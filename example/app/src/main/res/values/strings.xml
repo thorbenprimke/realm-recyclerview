@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Recycler View</string>
+    <string name="activity_selector_name">Realm RecyclerView Examples</string>
+    <string name="activity_layout_name">%s Example</string>
+
+    <string name="linear_demo">Linear Layout Example</string>
+    <string name="grid_demo">Grid Layout Example</string>
+</resources>

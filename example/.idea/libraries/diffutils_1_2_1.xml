@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="diffutils-1.2.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../library/libs/diffutils-1.2.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

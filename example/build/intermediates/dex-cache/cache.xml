@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/Users/thorben/projects/realm-recyclerview/example/app/build/intermediates/exploded-aar/example/library/unspecified/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="9677acfee817cf51597e135e8e8bcde723bf3cfb">
+        <dex dex="/Users/thorben/projects/realm-recyclerview/example/app/build/intermediates/pre-dexed/debug/classes-4e75dc4a92db0ba7febfea5e41c1c221fe80fc1d.jar" />
+    </item>
+
+</items>
