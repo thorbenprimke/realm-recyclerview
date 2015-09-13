@@ -18,6 +18,7 @@ import android.widget.TextView;
 import java.util.Arrays;
 import java.util.List;
 
+import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import co.moonmonkeylabs.realmrecyclerview.example.models.QuoteModel;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
             Color.RED,
             Color.YELLOW);
 
-    private RecyclerView recyclerView;
+    private RealmRecyclerView realmRecyclerView;
     private QuoteRecyclerViewAdapter quoteAdapter;
     private Realm realm;
     private String type;
@@ -61,24 +62,21 @@ public class MainActivity extends AppCompatActivity {
         resetRealm();
         realm = Realm.getInstance(this);
 
-
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setHasFixedSize(true);
+        realmRecyclerView = (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
 
         if (type.equals("Grid")) {
             GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
-            recyclerView.setLayoutManager(gridLayoutManager);
+            realmRecyclerView.setLayoutManager(gridLayoutManager);
         } else {
             LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
             linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            recyclerView.setLayoutManager(linearLayoutManager);
+            realmRecyclerView.setLayoutManager(linearLayoutManager);
         }
-
-
+        
         RealmResults<QuoteModel> quoteModels =
                 realm.where(QuoteModel.class).findAllSorted("id", false);
         quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true);
-        recyclerView.setAdapter(quoteAdapter);
+        realmRecyclerView.setAdapter(quoteAdapter);
     }
 
     @Override
