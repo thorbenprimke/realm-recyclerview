@@ -68,6 +68,8 @@ public abstract class RealmBasedRecyclerViewAdapter<T extends RealmObject,
                                 notifyItemInserted(delta.getRevised().getPosition());
                             } else if (delta.getType() == Delta.TYPE.DELETE) {
                                 notifyItemRemoved(delta.getOriginal().getPosition());
+                            } else {
+                                notifyItemChanged(delta.getRevised().getPosition());
                             }
                         }
                     }
@@ -81,6 +83,9 @@ public abstract class RealmBasedRecyclerViewAdapter<T extends RealmObject,
     }
 
     private List<Long> getIdsOfRealmResults() {
+        // TODO -> Use the primaryKey column for the diff
+        // realmResults.getTable().getTable().getColumnType()
+
         if (realmResults.size() == 0 || !(realmResults.get(0) instanceof DiffableLongIdItem)) {
             return EMPTY_LIST;
         }
