@@ -77,6 +77,15 @@ public class MainActivity extends AppCompatActivity {
                 realm.where(QuoteModel.class).findAllSorted("id", false);
         quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true);
         realmRecyclerView.setAdapter(quoteAdapter);
+
+        realmRecyclerView.setOnRefreshListener(
+                new RealmRecyclerView.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        asyncRefreshAllQuotes();
+                    }
+                }
+        );
     }
 
     @Override
@@ -179,6 +188,35 @@ public class MainActivity extends AppCompatActivity {
                 }
                 instance.close();
                 return null;
+            }
+        };
+        remoteItem.execute();
+    }
+
+    private void asyncRefreshAllQuotes() {
+        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                // Add some delay to the refresh/remove action.
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
+                Realm instance = Realm.getInstance(MainActivity.this);
+                final RealmResults<QuoteModel> all = instance.where(QuoteModel.class).findAll();
+                if (all != null) {
+                    instance.beginTransaction();
+                    all.clear();
+                    instance.commitTransaction();
+                }
+                instance.close();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                realmRecyclerView.setRefreshing(false);
             }
         };
         remoteItem.execute();

@@ -1,43 +1,76 @@
 package co.moonmonkeylabs.realmrecyclerview;
 
 import android.content.Context;
-import android.support.v7.widget.GridLayoutManager;
+import android.content.res.TypedArray;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-
 import android.view.View;
 import android.widget.FrameLayout;
 
 /**
  * A recyclerView that has a few extra features.
  * - Automatic empty state
+ * - Pull-to-refresh
  */
 public class RealmRecyclerView extends FrameLayout {
 
+    public interface OnRefreshListener {
+        void onRefresh();
+    }
+
+    private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private FrameLayout emptyContentContainer;
 
+    // Attributes
+    private boolean isRefreshable;
+
+    // State
+    private boolean isRefreshing;
+
+    // Listener
+    private OnRefreshListener onRefreshListener;
+
     public RealmRecyclerView(Context context) {
         super(context);
-        init();
+        init(context, null);
     }
 
     public RealmRecyclerView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public RealmRecyclerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
-    private void init() {
-        inflate(getContext(), R.layout.realm_recycler_view, this);
+    private void init(Context context, AttributeSet attrs) {
+        inflate(context, R.layout.realm_recycler_view, this);
+        initAttrs(context, attrs);
 
-        emptyContentContainer = (FrameLayout) findViewById(R.id.empty_content_container);
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.rrv_swipe_refresh_layout);
+        recyclerView = (RecyclerView) findViewById(R.id.rrv_recycler_view);
+        emptyContentContainer = (FrameLayout) findViewById(R.id.rrv_empty_content_container);
+
+        if (isRefreshable) {
+            swipeRefreshLayout.setEnabled(isRefreshable);
+            swipeRefreshLayout.setOnRefreshListener(recyclerViewRefreshListener);
+        }
+
         recyclerView.setHasFixedSize(true);
+    }
+
+    private void initAttrs(Context context, AttributeSet attrs) {
+        TypedArray typedArray =
+                context.obtainStyledAttributes(attrs, R.styleable.RealmRecyclerView);
+
+        if (typedArray != null) {
+            isRefreshable =
+                    typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvIsRefreshable, false);
+        }
     }
 
     public void setAdapter(final RecyclerView.Adapter adapter) {
@@ -91,4 +124,32 @@ public class RealmRecyclerView extends FrameLayout {
     public void setLayoutManager(RecyclerView.LayoutManager layoutManager) {
         recyclerView.setLayoutManager(layoutManager);
     }
+
+
+    //
+    // Pull-to-refresh
+    //
+
+    public void setOnRefreshListener(OnRefreshListener onRefreshListener) {
+        this.onRefreshListener = onRefreshListener;
+    }
+
+    public void setRefreshing(boolean refreshing) {
+        if (!isRefreshable) {
+            return;
+        }
+        isRefreshing = refreshing;
+        swipeRefreshLayout.setRefreshing(refreshing);
+    }
+
+    private SwipeRefreshLayout.OnRefreshListener recyclerViewRefreshListener =
+            new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    if (!isRefreshing && onRefreshListener != null) {
+                        onRefreshListener.onRefresh();
+                    }
+                    isRefreshing = true;
+                }
+            };
 }

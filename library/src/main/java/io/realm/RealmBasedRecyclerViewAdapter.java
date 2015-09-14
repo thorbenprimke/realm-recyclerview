@@ -54,6 +54,12 @@ public abstract class RealmBasedRecyclerViewAdapter<T extends RealmObject,
             public void onChange() {
                 if (ids != null && !ids.isEmpty()) {
                     List<Long> newIds = getIdsOfRealmResults();
+                    // If the list is now empty, just notify the recyclerView of the change.
+                    if (newIds.isEmpty()) {
+                        ids = newIds;
+                        notifyDataSetChanged();
+                        return;
+                    }
                     Patch patch = DiffUtils.diff(ids, newIds);
                     List<Delta> deltas = patch.getDeltas();
                     ids = newIds;
