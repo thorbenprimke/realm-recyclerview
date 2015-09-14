@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         
         RealmResults<QuoteModel> quoteModels =
                 realm.where(QuoteModel.class).findAllSorted("id", false);
-        quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true);
+        quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true, true);
         realmRecyclerView.setAdapter(quoteAdapter);
 
         realmRecyclerView.setOnRefreshListener(
@@ -117,8 +117,9 @@ public class MainActivity extends AppCompatActivity {
         public QuoteRecyclerViewAdapter(
                 Context context,
                 RealmResults<QuoteModel> realmResults,
-                boolean automaticUpdate) {
-            super(context, realmResults, automaticUpdate);
+                boolean automaticUpdate,
+                boolean animateIdType) {
+            super(context, realmResults, automaticUpdate, animateIdType);
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

@@ -15,14 +15,13 @@
  */
 package co.moonmonkeylabs.realmrecyclerview.example.models;
 
-import co.moonmonkeylabs.realmrecyclerview.DiffableLongIdItem;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 /**
  * The quote model contains a quote and a unique id.
  */
-public class QuoteModel extends RealmObject implements DiffableLongIdItem {
+public class QuoteModel extends RealmObject {
 
     @PrimaryKey
     private long id;
