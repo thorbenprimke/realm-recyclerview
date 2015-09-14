@@ -2,5 +2,6 @@
 <resources>
     <declare-styleable name="RealmRecyclerView">
         <attr name="rrvIsRefreshable" format="boolean"/>
+        <attr name="rrvEmptyLayoutId" format="reference"/>
     </declare-styleable>
 </resources>

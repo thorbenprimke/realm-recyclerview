@@ -6,6 +6,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewStub;
 import android.widget.FrameLayout;
 
 /**
@@ -21,10 +22,12 @@ public class RealmRecyclerView extends FrameLayout {
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
-    private FrameLayout emptyContentContainer;
+
+    private ViewStub emptyContentContainer;
 
     // Attributes
     private boolean isRefreshable;
+    private int emptyViewId;
 
     // State
     private boolean isRefreshing;
@@ -53,11 +56,16 @@ public class RealmRecyclerView extends FrameLayout {
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.rrv_swipe_refresh_layout);
         recyclerView = (RecyclerView) findViewById(R.id.rrv_recycler_view);
-        emptyContentContainer = (FrameLayout) findViewById(R.id.rrv_empty_content_container);
+        emptyContentContainer = (ViewStub) findViewById(R.id.rrv_empty_content_container);
 
         if (isRefreshable) {
             swipeRefreshLayout.setEnabled(isRefreshable);
             swipeRefreshLayout.setOnRefreshListener(recyclerViewRefreshListener);
+        }
+
+        if (emptyViewId != 0) {
+            emptyContentContainer.setLayoutResource(emptyViewId);
+            emptyContentContainer.inflate();
         }
 
         recyclerView.setHasFixedSize(true);
@@ -70,6 +78,8 @@ public class RealmRecyclerView extends FrameLayout {
         if (typedArray != null) {
             isRefreshable =
                     typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvIsRefreshable, false);
+            emptyViewId =
+                    typedArray.getResourceId(R.styleable.RealmRecyclerView_rrvEmptyLayoutId, 0);
         }
     }
 
@@ -110,15 +120,20 @@ public class RealmRecyclerView extends FrameLayout {
                         }
 
                         private void update() {
-                            emptyContentContainer.setVisibility(
-                                    adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+                            updateEmptyContentContainerVisibility(adapter);
                         }
                     }
             );
-            if (adapter.getItemCount() == 0) {
-                emptyContentContainer.setVisibility(View.VISIBLE);
-            }
+            updateEmptyContentContainerVisibility(adapter);
         }
+    }
+
+    private void updateEmptyContentContainerVisibility(RecyclerView.Adapter adapter) {
+        if (emptyViewId == 0) {
+            return;
+        }
+        emptyContentContainer.setVisibility(
+                adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
 
     public void setLayoutManager(RecyclerView.LayoutManager layoutManager) {
