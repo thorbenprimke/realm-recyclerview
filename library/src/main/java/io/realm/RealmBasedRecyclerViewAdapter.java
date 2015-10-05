@@ -83,7 +83,13 @@ public abstract class RealmBasedRecyclerViewAdapter<T extends RealmObject,
 
         List ids = new ArrayList(realmResults.size());
         for (int i = 0; i < realmResults.size(); i++) {
-            ids.add(realmResults.get(i).row.getLong(animateColumnIndex));
+            if (animateIdType == ColumnType.INTEGER) {
+                ids.add(realmResults.get(i).row.getLong(animateColumnIndex));
+            } else if (animateIdType == ColumnType.STRING) {
+                ids.add(realmResults.get(i).row.getString(animateColumnIndex));
+            } else {
+                throw new IllegalStateException("Unknown animatedIdType");
+            }
         }
         return ids;
     }
