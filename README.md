@@ -11,7 +11,7 @@ A powerful Recyclerview wrapper when working with Realm as your datastore. It su
 ###How To Include It:
 
 ```
-	 repositories {
+	repositories {
         // ...
         maven { url "https://jitpack.io" }
     }
@@ -25,7 +25,6 @@ A powerful Recyclerview wrapper when working with Realm as your datastore. It su
 
 ###Demo
 
-A demo is in the example folder. Click the image below to play the video.
+A demo is in the example folder. A video is in the extra folder.
 
-![Screenshot](extras/screenshot-demo-app.png)
-[Play](extra/realm-recycler-view-demo.webm)
+<img src="https://raw.githubusercontent.com/thorbenprimke/realm-recyclerview/master/extra/screenshot-demo-app.png" height=300/>
