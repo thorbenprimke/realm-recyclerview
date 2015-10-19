@@ -28,6 +28,20 @@ public class LayoutSelectorActivity extends AppCompatActivity {
                 }
         );
 
+        final Button linearWithLoadMoreButton =
+                (Button) findViewById(R.id.recycler_linear_with_load_more_button);
+        linearWithLoadMoreButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(LayoutSelectorActivity.this, MainActivity.class);
+                        intent.putExtra("Type", "LinearLoadMore");
+                        startActivity(intent);
+                    }
+                }
+        );
+
+
         final Button gridButton = (Button) findViewById(R.id.recycler_grid_button);
         gridButton.setOnClickListener(
                 new View.OnClickListener() {
@@ -35,6 +49,18 @@ public class LayoutSelectorActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         Intent intent = new Intent(LayoutSelectorActivity.this, MainActivity.class);
                         intent.putExtra("Type", "Grid");
+                        startActivity(intent);
+                    }
+                }
+        );
+
+        final Button sectionButton = (Button) findViewById(R.id.recycler_section_header_button);
+        sectionButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(LayoutSelectorActivity.this, MainActivity2.class);
+                        intent.putExtra("Type", "Header (SLM) ");
                         startActivity(intent);
                     }
                 }

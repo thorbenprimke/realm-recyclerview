@@ -3,5 +3,12 @@
     <declare-styleable name="RealmRecyclerView">
         <attr name="rrvIsRefreshable" format="boolean"/>
         <attr name="rrvEmptyLayoutId" format="reference"/>
+        <attr name="rrvLayoutType">
+            <enum name="LinearLayout" value="0"/>
+            <enum name="Grid" value="1"/>
+            <enum name="LinearLayoutWithHeaders" value="2"/>
+        </attr>
+        <attr name="rrvGridLayoutSpanCount" format="integer"/>
+        <attr name="rrvHeaderColumnName" format="string"/>
     </declare-styleable>
 </resources>

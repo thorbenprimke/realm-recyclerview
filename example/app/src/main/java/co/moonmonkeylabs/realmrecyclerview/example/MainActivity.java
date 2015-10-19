@@ -5,15 +5,13 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +22,7 @@ import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
+import io.realm.RealmViewHolder;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,27 +53,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
         type = getIntent().getStringExtra("Type");
+        if (type.equals("Grid")) {
+            setContentView(R.layout.activity_main_grid_layout);
+        } else {
+            setContentView(R.layout.activity_main_linear_layout);
+        }
+        realmRecyclerView = (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
+
         setTitle(getResources().getString(R.string.activity_layout_name, type));
 
         resetRealm();
         realm = Realm.getInstance(this);
 
-        realmRecyclerView = (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
-
-        if (type.equals("Grid")) {
-            GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
-            realmRecyclerView.setLayoutManager(gridLayoutManager);
-        } else {
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-            realmRecyclerView.setLayoutManager(linearLayoutManager);
+        boolean isLoadMore = type.equals("LinearLoadMore");
+        if (isLoadMore) {
+            realm.beginTransaction();
+            for (int i = 0; i < 60; i++) {
+                QuoteModel quoteModel = realm.createObject(QuoteModel.class);
+                quoteModel.setId(i + 1);
+                quoteModel.setQuote(quotes.get((int) (quoteModel.getId() % quotes.size())));
+            }
+            realm.commitTransaction();
         }
-        
+
         RealmResults<QuoteModel> quoteModels =
-                realm.where(QuoteModel.class).findAllSorted("id", false);
+                realm.where(QuoteModel.class).findAllSorted("id", isLoadMore ? true : false);
         quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true, true);
         realmRecyclerView.setAdapter(quoteAdapter);
 
@@ -86,6 +91,24 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        if (isLoadMore) {
+            realmRecyclerView.setOnLoadMoreListener(
+                    new RealmRecyclerView.OnLoadMoreListener() {
+                        @Override
+                        public void onLoadMore(Object lastItem) {
+                            if (lastItem instanceof QuoteModel) {
+                                Toast.makeText(
+                                        MainActivity.this,
+                                        ((QuoteModel) lastItem).getId() + " ",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                            asyncLoadMoreQuotes();
+                        }
+                    }
+            );
+            realmRecyclerView.enableShowLoadMore();
+        }
     }
 
     @Override
@@ -122,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
             super(context, realmResults, automaticUpdate, animateIdType);
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RealmViewHolder {
             public FrameLayout container;
             public TextView quoteTextView;
             public ViewHolder(FrameLayout container) {
@@ -133,15 +156,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public ViewHolder onCreateRealmViewHolder(ViewGroup viewGroup, int viewType) {
             View v = inflater.inflate(R.layout.item_view, viewGroup, false);
             ViewHolder vh = new ViewHolder((FrameLayout) v);
             return vh;
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder viewHolder, int i) {
-            final QuoteModel quoteModel = realmResults.get(i);
+        public void onBindRealmViewHolder(ViewHolder viewHolder, int position) {
+            final QuoteModel quoteModel = realmResults.get(position);
             viewHolder.quoteTextView.setOnClickListener(
                     new View.OnClickListener() {
                         @Override
@@ -155,6 +178,11 @@ public class MainActivity extends AppCompatActivity {
                         colors.get((int) (quoteModel.getId() % colors.size())));
             }
             viewHolder.quoteTextView.setText(quoteModel.getQuote());
+        }
+
+        @Override
+        public ViewHolder convertViewHolder(RealmViewHolder viewHolder) {
+            return ViewHolder.class.cast(viewHolder);
         }
     }
 
@@ -218,6 +246,36 @@ public class MainActivity extends AppCompatActivity {
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
                 realmRecyclerView.setRefreshing(false);
+            }
+        };
+        remoteItem.execute();
+    }
+
+    private void asyncLoadMoreQuotes() {
+        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                // Add some delay to the refresh/remove action.
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                }
+                Realm instance = Realm.getInstance(MainActivity.this);
+                instance.beginTransaction();
+                for (int i = 0; i < 60; i++) {
+                    QuoteModel quoteModel = instance.createObject(QuoteModel.class);
+                    quoteModel.setId(i + 100); // That is to offset for primary key
+                    quoteModel.setQuote(quotes.get((int) (quoteModel.getId() % quotes.size())));
+                }
+                instance.commitTransaction();
+                instance.close();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                realmRecyclerView.disableShowLoadMore();
             }
         };
         remoteItem.execute();

@@ -23,4 +23,6 @@ dependencies {
 
     compile 'com.android.support:recyclerview-v7:22.0.+'
     compile 'io.realm:realm-android:0.82.+'
+
+    compile 'com.github.TonicArtos:SuperSLiM:ed0ba4b4d2'
 }

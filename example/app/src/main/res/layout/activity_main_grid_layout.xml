@@ -10,6 +10,7 @@
         android:layout_height="match_parent"
         app:rrvIsRefreshable="true"
         app:rrvEmptyLayoutId="@layout/empty_view"
-
+        app:rrvLayoutType="Grid"
+        app:rrvGridLayoutSpanCount="2"
         />
 </RelativeLayout>
