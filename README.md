@@ -25,6 +25,4 @@ A powerful Recyclerview wrapper when working with Realm as your datastore. It su
 
 ###Demo
 
-A demo is in the example folder. A video is in the extra folder.
-
-<img src="https://raw.githubusercontent.com/thorbenprimke/realm-recyclerview/master/extra/screenshot-demo-app.png" height=300/>
+![Screenshot](https://raw.githubusercontent.com/thorbenprimke/realm-recyclerview/master/extra/screenshot-demo-app.gif)
