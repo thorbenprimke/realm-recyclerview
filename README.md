@@ -19,7 +19,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 ```
 	dependencies {
-	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9'
+	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.1'
 	}
 ```
 
@@ -91,5 +91,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 Included dependencies are:
-Copyright (C) SuperSLiM/Tonic Artos (https://github.com/TonicArtos/SuperSLiM)
+Realm (https://github.com/realm/realm-java)
+SuperSLiM/Tonic Artos (https://github.com/TonicArtos/SuperSLiM)
 ```
