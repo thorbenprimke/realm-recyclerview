@@ -109,6 +109,9 @@ public class RealmRecyclerView extends FrameLayout {
             case LinearLayoutWithHeaders:
                 recyclerView.setLayoutManager(new LayoutManager(getContext()));
                 break;
+
+            default:
+                throw new IllegalStateException("The type attribute has to be set.");
         }
         recyclerView.setHasFixedSize(true);
 
@@ -265,13 +268,6 @@ public class RealmRecyclerView extends FrameLayout {
     //
     // Pull-to-refresh
     //
-
-    /**
-     * Only if custom is set for the manager, this method should be used to set the manager.
-     */
-    public void setLayoutManager(RecyclerView.LayoutManager layoutManger) {
-        recyclerView.setLayoutManager(layoutManger);
-    }
 
     public void setOnRefreshListener(OnRefreshListener onRefreshListener) {
         this.onRefreshListener = onRefreshListener;

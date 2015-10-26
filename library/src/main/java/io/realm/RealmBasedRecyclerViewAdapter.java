@@ -19,6 +19,7 @@ package io.realm;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,25 +35,20 @@ import java.util.Objects;
 
 import co.moonmonkeylabs.realmrecyclerview.LoadMoreListItemView;
 import co.moonmonkeylabs.realmrecyclerview.R;
+import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import io.realm.internal.ColumnType;
 import io.realm.internal.TableOrView;
 
+/**
+ * The base {@link RecyclerView.Adapter} that includes custom functionality to be used with the
+ * {@link RealmRecyclerView}.
+ */
 public abstract class RealmBasedRecyclerViewAdapter
         <T extends RealmObject, VH extends RealmViewHolder>
         extends RecyclerView.Adapter<RealmViewHolder> {
-
-    public void addLoadMore() {
-        loadMoreItem = new Object();
-        notifyDataSetChanged();
-    }
-
-    public void removeLoadMore() {
-        loadMoreItem = null;
-        notifyDataSetChanged();
-    }
 
     public class RowWrapper {
 
@@ -154,6 +150,10 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public abstract VH convertViewHolder(RealmViewHolder viewHolder);
 
+    /**
+     * DON'T OVERRIDE THIS METHOD. Implement onCreateRealmViewHolder instead.
+     */
+    @Override
     public RealmViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         if (viewType == HEADER_VIEW_TYPE) {
             View view = inflater.inflate(R.layout.header_item, viewGroup, false);
@@ -164,13 +164,16 @@ public abstract class RealmBasedRecyclerViewAdapter
         return onCreateRealmViewHolder(viewGroup, viewType);
     }
 
+    /**
+     * DON'T OVERRIDE THIS METHOD. Implement onBindRealmViewHolder instead.
+     */
     @Override
     public void onBindViewHolder(RealmViewHolder holder, int position) {
         if (getItemViewType(position) == LOAD_MORE_VIEW_TYPE) {
             holder.loadMoreView.showSpinner();
         } else {
             if (addSectionHeaders) {
-                final String header = (String) rowWrappers.get(position).header;
+                final String header = rowWrappers.get(position).header;
                 final GridSLM.LayoutParams layoutParams =
                         GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
                 // Setup the header
@@ -234,8 +237,8 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     /**
-     * Update the RealmResults associated to the Adapter. Useful when the query has been changed.
-     * If the query does not change you might consider using the automaticUpdate feature
+     * Update the RealmResults associated with the Adapter. Useful when the query has been changed.
+     * If the query does not change you might consider using the automaticUpdate feature.
      *
      * @param queryResults the new RealmResults coming from the new query.
      */
@@ -258,7 +261,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     /**
-     * Method that create the header string that should be used. Override this method to have
+     * Method that creates the header string that should be used. Override this method to have
      * a custom header.
      */
     public String createHeaderFromColumnValue(String columnValue) {
@@ -390,6 +393,28 @@ public abstract class RealmBasedRecyclerViewAdapter
                 }
             }
         };
+    }
+
+    /**
+     * Adds the LoadMore item.
+     */
+    public void addLoadMore() {
+        if (loadMoreItem != null) {
+            return;
+        }
+        loadMoreItem = new Object();
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Removes the LoadMoreItems;
+     */
+    public void removeLoadMore() {
+        if (loadMoreItem == null) {
+            return;
+        }
+        loadMoreItem = null;
+        notifyDataSetChanged();
     }
 }
 
