@@ -179,11 +179,6 @@ public class MainActivity extends AppCompatActivity {
             }
             viewHolder.quoteTextView.setText(quoteModel.getQuote());
         }
-
-        @Override
-        public ViewHolder convertViewHolder(RealmViewHolder viewHolder) {
-            return ViewHolder.class.cast(viewHolder);
-        }
     }
 
     private void asyncAddQuote() {

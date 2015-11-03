@@ -27,6 +27,6 @@ dependencies {
 
     compile 'com.android.support:recyclerview-v7:22.0.+'
 
-//    compile project(':library')
-    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.1'
+    compile project(':library')
+//    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.1'
 }

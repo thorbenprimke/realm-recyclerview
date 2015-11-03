@@ -118,11 +118,6 @@ public class MainActivity2 extends AppCompatActivity {
                     }
             );
         }
-
-        @Override
-        public ViewHolder convertViewHolder(RealmViewHolder viewHolder) {
-            return ViewHolder.class.cast(viewHolder);
-        }
     }
 
     private void resetRealm() {

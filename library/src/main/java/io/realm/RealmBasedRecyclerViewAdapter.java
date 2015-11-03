@@ -148,8 +148,6 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public abstract void onBindRealmViewHolder(VH holder, int position);
 
-    public abstract VH convertViewHolder(RealmViewHolder viewHolder);
-
     /**
      * DON'T OVERRIDE THIS METHOD. Implement onCreateRealmViewHolder instead.
      */
@@ -168,6 +166,7 @@ public abstract class RealmBasedRecyclerViewAdapter
      * DON'T OVERRIDE THIS METHOD. Implement onBindRealmViewHolder instead.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void onBindViewHolder(RealmViewHolder holder, int position) {
         if (getItemViewType(position) == LOAD_MORE_VIEW_TYPE) {
             holder.loadMoreView.showSpinner();
@@ -186,7 +185,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                     }
                     layoutParams.isHeader = true;
                 } else {
-                    onBindRealmViewHolder(convertViewHolder(holder), position);
+                    onBindRealmViewHolder((VH) holder, position);
                 }
                 layoutParams.setSlm(LinearSLM.ID);
                 if (header != null) {
@@ -196,7 +195,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                 }
                 holder.itemView.setLayoutParams(layoutParams);
             } else {
-                onBindRealmViewHolder(convertViewHolder(holder), position);
+                onBindRealmViewHolder((VH) holder, position);
             }
         }
     }
