@@ -50,7 +50,7 @@ public class GridExampleActivity extends AppCompatActivity {
         realmRecyclerView.setAdapter(nyTimesStoryAdapter);
 
         final NYTimesDataLoader nyTimesDataLoader = new NYTimesDataLoader();
-        nyTimesDataLoader.loadData("home", realm, "b9989f55a0c330b0bdfea069af08b163:15:73381676");
+        nyTimesDataLoader.loadData("home", realm, "YOUR_NY_TIMES_API_KEY");
     }
 
     @Override
