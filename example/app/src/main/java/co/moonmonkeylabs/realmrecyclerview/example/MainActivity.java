@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 RealmResults<QuoteModel> realmResults,
                 boolean automaticUpdate,
                 boolean animateIdType) {
-            super(context, realmResults, automaticUpdate, animateIdType);
+            super(context, realmResults, automaticUpdate, animateIdType, "quote");
         }
 
         public class ViewHolder extends RealmViewHolder {
@@ -170,6 +170,15 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             asyncRemoveQuote(quoteModel.getId());
+                        }
+                    }
+            );
+            viewHolder.quoteTextView.setOnLongClickListener(
+                    new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            asyncUpdateQuote(quoteModel.getId());
+                            return true;
                         }
                     }
             );
@@ -208,6 +217,25 @@ public class MainActivity extends AppCompatActivity {
                 if (quoteModel != null) {
                     instance.beginTransaction();
                     quoteModel.removeFromRealm();
+                    instance.commitTransaction();
+                }
+                instance.close();
+                return null;
+            }
+        };
+        remoteItem.execute();
+    }
+
+    private void asyncUpdateQuote(final long id) {
+        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Realm instance = Realm.getInstance(MainActivity.this);
+                QuoteModel quoteModel =
+                        instance.where(QuoteModel.class).equalTo("id", id).findFirst();
+                if (quoteModel != null) {
+                    instance.beginTransaction();
+                    quoteModel.setQuote("Updated: " + quoteModel.getQuote());
                     instance.commitTransaction();
                 }
                 instance.close();

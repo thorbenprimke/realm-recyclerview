@@ -36,6 +36,7 @@ import java.util.Objects;
 import co.moonmonkeylabs.realmrecyclerview.LoadMoreListItemView;
 import co.moonmonkeylabs.realmrecyclerview.R;
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
+import difflib.Chunk;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -97,17 +98,51 @@ public abstract class RealmBasedRecyclerViewAdapter
             Context context,
             RealmResults<T> realmResults,
             boolean automaticUpdate,
+            boolean animateResults,
+            String animateColumnName) {
+        this(
+                context,
+                realmResults,
+                automaticUpdate,
+                animateResults,
+                false,
+                null,
+                animateColumnName);
+    }
+
+    public RealmBasedRecyclerViewAdapter(
+            Context context,
+            RealmResults<T> realmResults,
+            boolean automaticUpdate,
             boolean animateResults) {
         this(context, realmResults, automaticUpdate, animateResults, false, null);
     }
 
     public RealmBasedRecyclerViewAdapter(
-        Context context,
-        RealmResults<T> realmResults,
-        boolean automaticUpdate,
-        boolean animateResults,
-        boolean addSectionHeaders,
-        String headerColumnName) {
+            Context context,
+            RealmResults<T> realmResults,
+            boolean automaticUpdate,
+            boolean animateResults,
+            boolean addSectionHeaders,
+            String headerColumnName) {
+        this(
+                context,
+                realmResults,
+                automaticUpdate,
+                animateResults,
+                addSectionHeaders,
+                headerColumnName,
+                null);
+    }
+
+    public RealmBasedRecyclerViewAdapter(
+            Context context,
+            RealmResults<T> realmResults,
+            boolean automaticUpdate,
+            boolean animateResults,
+            boolean addSectionHeaders,
+            String headerColumnName,
+            String animateColumnName) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");
         }
@@ -123,17 +158,22 @@ public abstract class RealmBasedRecyclerViewAdapter
         // If automatic updates aren't enabled, then animateResults should be false as well.
         this.animateResults = (automaticUpdate && animateResults);
         if (animateResults) {
-            final long primaryKey = realmResults.getTable().getTable().getPrimaryKey();
-            if (primaryKey == TableOrView.NO_MATCH) {
-                throw new IllegalStateException("Animating the results requires a primaryKey.");
+            if (animateColumnName == null) {
+                animateColumnIndex = realmResults.getTable().getTable().getPrimaryKey();
+            } else {
+                animateColumnIndex = realmResults.getTable().getTable()
+                        .getColumnIndex(animateColumnName);
             }
-            ColumnType columnType = realmResults.getTable().getColumnType(primaryKey);
-            if (columnType != ColumnType.INTEGER && columnType != ColumnType.STRING) {
+            if (animateColumnIndex == TableOrView.NO_MATCH) {
+                throw new IllegalStateException(
+                        "Animating the results requires a primaryKey/valid animateColumnName.");
+            }
+
+            animateIdType = realmResults.getTable().getColumnType(animateColumnIndex);
+            if (animateIdType != ColumnType.INTEGER && animateIdType != ColumnType.STRING) {
                 throw new IllegalStateException(
                         "Animating requires a primary key of type Integer/Long or String");
             }
-            animateColumnIndex = primaryKey;
-            animateIdType = columnType;
         }
 
         if (addSectionHeaders && headerColumnName == null) {
@@ -353,7 +393,8 @@ public abstract class RealmBasedRecyclerViewAdapter
                             if (delta.getRevised().size() == 1) {
                                 notifyItemInserted(delta.getRevised().getPosition());
                             } else {
-                                notifyDataSetChanged();
+                                final Chunk revised = delta.getRevised();
+                                notifyItemRangeInserted(revised.getPosition(), revised.size());
                             }
                         } else if (delta.getType() == Delta.TYPE.DELETE) {
                             if (delta.getOriginal().size() == 1) {
