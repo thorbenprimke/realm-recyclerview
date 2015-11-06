@@ -19,14 +19,30 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/NOTICE'
+    }
+
+    dexOptions {
+        preDexLibraries = false
+    }
 }
 
 dependencies {
     testCompile 'junit:junit:4.12'
+    compile 'com.android.support:support-v4:22.2.1'
     compile 'com.android.support:appcompat-v7:22.2.1'
-
     compile 'com.android.support:recyclerview-v7:22.0.+'
 
+    compile 'com.github.bumptech.glide:glide:3.6.1'
+
+    // The library reference
     compile project(':library')
-//    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.1'
+//    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.2'
+
+    // The date project reference
+    //    compile project(':data')
+    compile 'com.github.thorbenprimke:realm-nytimes-data:0.9.0'
 }
