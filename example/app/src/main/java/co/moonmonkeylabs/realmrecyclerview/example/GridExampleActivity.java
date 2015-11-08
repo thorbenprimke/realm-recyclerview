@@ -50,7 +50,7 @@ public class GridExampleActivity extends AppCompatActivity {
         realmRecyclerView.setAdapter(nyTimesStoryAdapter);
 
         final NYTimesDataLoader nyTimesDataLoader = new NYTimesDataLoader();
-        nyTimesDataLoader.loadData("home", realm, "YOUR_NY_TIMES_API_KEY");
+        nyTimesDataLoader.loadAllData(realm, "YOUR_NY_TIMES_API_KEY");
     }
 
     @Override
@@ -103,6 +103,8 @@ public class GridExampleActivity extends AppCompatActivity {
             if (multimedia != null && !multimedia.isEmpty()) {
                 Glide.with(GridExampleActivity.this).load(
                         multimedia.get(0).getUrl()).into(viewHolder.image);
+            } else {
+                viewHolder.image.setImageResource(R.drawable.nytimes_logo);
             }
             viewHolder.storyAbstract.setText(nyTimesStory.getStoryAbstract());
         }
