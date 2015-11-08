@@ -28,6 +28,18 @@ public class LayoutSelectorActivity extends AppCompatActivity {
                 }
         );
 
+        final Button linearBulkButton = (Button) findViewById(R.id.recycler_linear_bulk_button);
+        linearBulkButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(LayoutSelectorActivity.this, MainActivity.class);
+                        intent.putExtra("Type", "LinearBulk");
+                        startActivity(intent);
+                    }
+                }
+        );
+
         final Button linearWithLoadMoreButton =
                 (Button) findViewById(R.id.recycler_linear_with_load_more_button);
         linearWithLoadMoreButton.setOnClickListener(

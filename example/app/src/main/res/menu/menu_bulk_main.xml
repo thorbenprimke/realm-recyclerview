@@ -1,0 +1,23 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MainActivity">
+    <item
+        android:id="@+id/action_add_quote"
+        android:title="Add Single"
+        android:orderInCategory="100"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_bulk_add_initial"
+        android:title="Bulk Add Initial"
+        android:orderInCategory="101"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_bulk_add_two"
+        android:title="Bulk Add Two"
+        android:orderInCategory="102"
+        app:showAsAction="always"/>
+</menu>

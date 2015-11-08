@@ -385,9 +385,9 @@ public abstract class RealmBasedRecyclerViewAdapter
                     if (deltas.isEmpty()) {
                         // Nothing has changed - most likely because the notification was for
                         // a different object/table
-                    } else if (deltas.size() > 1) {
-                        notifyDataSetChanged();
-                    } else {
+                    } else if (addSectionHeaders) {
+                        // If sectionHeaders are enabled, the animations have some special cases and
+                        // the non-animated rows need to be updated as well.
                         Delta delta = deltas.get(0);
                         if (delta.getType() == Delta.TYPE.INSERT) {
                             if (delta.getRevised().size() == 1) {
@@ -417,14 +417,29 @@ public abstract class RealmBasedRecyclerViewAdapter
                                         0,
                                         delta.getOriginal().getPosition() - 1);
                             }
-                            if (delta.getOriginal().getPosition() > 0 &&
-                                    newIds.size() > 0) {
+                            if (delta.getOriginal().getPosition() > 0 && newIds.size() > 0) {
                                 notifyItemRangeChanged(
                                         delta.getOriginal().getPosition(),
                                         newIds.size() - 1);
                             }
                         } else {
                             notifyDataSetChanged();
+                        }
+                    } else {
+                        for (Delta delta : deltas) {
+                            if (delta.getType() == Delta.TYPE.INSERT) {
+                                notifyItemRangeInserted(
+                                        delta.getRevised().getPosition(),
+                                        delta.getRevised().size());
+                            } else if (delta.getType() == Delta.TYPE.DELETE) {
+                                notifyItemRangeRemoved(
+                                        delta.getOriginal().getPosition(),
+                                        delta.getOriginal().size());
+                            } else {
+                                notifyItemRangeChanged(
+                                        delta.getRevised().getPosition(),
+                                        delta.getRevised().size());
+                            }
                         }
                     }
                 } else {

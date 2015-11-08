@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         resetRealm();
         realm = Realm.getInstance(this);
 
+        boolean isBulk = type.equals("LinearBulk");
+
         boolean isLoadMore = type.equals("LinearLoadMore");
         if (isLoadMore) {
             realm.beginTransaction();
@@ -78,8 +80,9 @@ public class MainActivity extends AppCompatActivity {
             realm.commitTransaction();
         }
 
-        RealmResults<QuoteModel> quoteModels =
-                realm.where(QuoteModel.class).findAllSorted("id", isLoadMore ? true : false);
+        RealmResults<QuoteModel> quoteModels = realm
+                .where(QuoteModel.class)
+                .findAllSorted("id", (isLoadMore || isBulk) ? true : false);
         quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true, true);
         realmRecyclerView.setAdapter(quoteAdapter);
 
@@ -120,7 +123,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        if (type.equals("LinearBulk")) {
+            getMenuInflater().inflate(R.menu.menu_bulk_main, menu);
+        } else {
+            getMenuInflater().inflate(R.menu.menu_main, menu);
+        }
         return true;
     }
 
@@ -129,6 +136,12 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_add_quote) {
             asyncAddQuote();
+            return true;
+        } else if (id == R.id.action_bulk_add_initial) {
+            asyncBulkAddInitial();
+            return true;
+        } else if (id == R.id.action_bulk_add_two) {
+            asyncBulkAddTwo();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -169,6 +182,9 @@ public class MainActivity extends AppCompatActivity {
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            if (!quoteModel.isValid()) {
+                                return;
+                            }
                             asyncRemoveQuote(quoteModel.getId());
                         }
                     }
@@ -199,6 +215,71 @@ public class MainActivity extends AppCompatActivity {
                 QuoteModel quoteModel = instance.createObject(QuoteModel.class);
                 quoteModel.setId(System.currentTimeMillis());
                 quoteModel.setQuote(quotes.get((int) (quoteModel.getId() % quotes.size())));
+                instance.commitTransaction();
+                instance.close();
+                return null;
+            }
+        };
+        remoteItem.execute();
+    }
+
+    private void asyncBulkAddInitial() {
+        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Realm instance = Realm.getInstance(MainActivity.this);
+                QuoteModel cached = instance.where(QuoteModel.class).equalTo("id", 1).findFirst();
+                if (cached != null) {
+                    instance.close();
+                    return null;
+                }
+
+                instance.beginTransaction();
+
+                QuoteModel quoteModel = instance.createObject(QuoteModel.class);
+                quoteModel.setId(1);
+                quoteModel.setQuote(quotes.get((int) (quoteModel.getId() % quotes.size())));
+
+                QuoteModel quoteModel2 = instance.createObject(QuoteModel.class);
+                quoteModel2.setId(3);
+                quoteModel2.setQuote(quotes.get((int) (quoteModel2.getId() % quotes.size())));
+
+                QuoteModel quoteModel3 = instance.createObject(QuoteModel.class);
+                quoteModel3.setId(5);
+                quoteModel3.setQuote(quotes.get((int) (quoteModel3.getId() % quotes.size())));
+
+                QuoteModel quoteModel4 = instance.createObject(QuoteModel.class);
+                quoteModel4.setId(7);
+                quoteModel4.setQuote(quotes.get((int) (quoteModel4.getId() % quotes.size())));
+
+                instance.commitTransaction();
+                instance.close();
+                return null;
+            }
+        };
+        remoteItem.execute();
+    }
+
+    private void asyncBulkAddTwo() {
+        AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                Realm instance = Realm.getInstance(MainActivity.this);
+                QuoteModel cached = instance.where(QuoteModel.class).equalTo("id", 2).findFirst();
+                if (cached != null) {
+                    instance.close();
+                    return null;
+                }
+                instance.beginTransaction();
+
+                QuoteModel quoteModel = instance.createObject(QuoteModel.class);
+                quoteModel.setId(2);
+                quoteModel.setQuote(quotes.get((int) (quoteModel.getId() % quotes.size())));
+
+                QuoteModel quoteModel2 = instance.createObject(QuoteModel.class);
+                quoteModel2.setId(4);
+                quoteModel2.setQuote(quotes.get((int) (quoteModel2.getId() % quotes.size())));
+
                 instance.commitTransaction();
                 instance.close();
                 return null;
