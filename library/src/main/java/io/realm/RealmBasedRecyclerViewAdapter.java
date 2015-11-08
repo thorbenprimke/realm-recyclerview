@@ -19,7 +19,6 @@ package io.realm;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +30,6 @@ import com.tonicartos.superslim.LinearSLM;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import co.moonmonkeylabs.realmrecyclerview.LoadMoreListItemView;
 import co.moonmonkeylabs.realmrecyclerview.R;
@@ -89,17 +87,20 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     private RealmChangeListener listener;
     private boolean animateResults;
-    private long animateColumnIndex;
-    private ColumnType animateIdType;
     private boolean addSectionHeaders;
     private String headerColumnName;
+
+    private long animatePrimaryColumnIndex;
+    private ColumnType animatePrimaryIdType;
+    private long animateExtraColumnIndex;
+    private ColumnType animateExtraIdType;
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
             RealmResults<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults,
-            String animateColumnName) {
+            String animateExtraColumnName) {
         this(
                 context,
                 realmResults,
@@ -107,7 +108,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                 animateResults,
                 false,
                 null,
-                animateColumnName);
+                animateExtraColumnName);
     }
 
     public RealmBasedRecyclerViewAdapter(
@@ -142,7 +143,7 @@ public abstract class RealmBasedRecyclerViewAdapter
             boolean animateResults,
             boolean addSectionHeaders,
             String headerColumnName,
-            String animateColumnName) {
+            String animateExtraColumnName) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");
         }
@@ -158,21 +159,33 @@ public abstract class RealmBasedRecyclerViewAdapter
         // If automatic updates aren't enabled, then animateResults should be false as well.
         this.animateResults = (automaticUpdate && animateResults);
         if (animateResults) {
-            if (animateColumnName == null) {
-                animateColumnIndex = realmResults.getTable().getTable().getPrimaryKey();
-            } else {
-                animateColumnIndex = realmResults.getTable().getTable()
-                        .getColumnIndex(animateColumnName);
-            }
-            if (animateColumnIndex == TableOrView.NO_MATCH) {
+            animatePrimaryColumnIndex = realmResults.getTable().getTable().getPrimaryKey();
+            if (animatePrimaryColumnIndex == TableOrView.NO_MATCH) {
                 throw new IllegalStateException(
-                        "Animating the results requires a primaryKey/valid animateColumnName.");
+                        "Animating the results requires a primaryKey.");
             }
-
-            animateIdType = realmResults.getTable().getColumnType(animateColumnIndex);
-            if (animateIdType != ColumnType.INTEGER && animateIdType != ColumnType.STRING) {
+            animatePrimaryIdType = realmResults.getTable().getColumnType(animatePrimaryColumnIndex);
+            if (animatePrimaryIdType != ColumnType.INTEGER &&
+                    animatePrimaryIdType != ColumnType.STRING) {
                 throw new IllegalStateException(
                         "Animating requires a primary key of type Integer/Long or String");
+            }
+
+            if (animateExtraColumnName != null) {
+                animateExtraColumnIndex = realmResults.getTable().getTable()
+                        .getColumnIndex(animateExtraColumnName);
+                if (animateExtraColumnIndex == TableOrView.NO_MATCH) {
+                    throw new IllegalStateException(
+                            "Animating the results requires a valid animateColumnName.");
+                }
+                animateExtraIdType = realmResults.getTable().getColumnType(animateExtraColumnIndex);
+                if (animateExtraIdType != ColumnType.INTEGER &&
+                        animateExtraIdType != ColumnType.STRING) {
+                    throw new IllegalStateException(
+                            "Animating requires a animateColumnName of type Int/Long or String");
+                }
+            } else {
+                animateExtraColumnIndex = -1;
             }
         }
 
@@ -333,12 +346,29 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     private Object getRealmRowId(int realmIndex) {
-        if (animateIdType == ColumnType.INTEGER) {
-            return realmResults.get(realmIndex).row.getLong(animateColumnIndex);
-        } else if (animateIdType == ColumnType.STRING) {
-            return realmResults.get(realmIndex).row.getString(animateColumnIndex);
+        Object rowPrimaryId;
+        if (animatePrimaryIdType == ColumnType.INTEGER) {
+            rowPrimaryId = realmResults.get(realmIndex).row.getLong(animatePrimaryColumnIndex);
+        } else if (animatePrimaryIdType == ColumnType.STRING) {
+            rowPrimaryId = realmResults.get(realmIndex).row.getString(animatePrimaryColumnIndex);
         } else {
             throw new IllegalStateException("Unknown animatedIdType");
+        }
+
+        if (animateExtraColumnIndex != -1) {
+            String rowPrimaryIdStr = (rowPrimaryId instanceof String)
+                    ? (String) rowPrimaryId : String.valueOf(rowPrimaryId);
+            if (animateExtraIdType == ColumnType.INTEGER) {
+                return rowPrimaryIdStr + String.valueOf(
+                        realmResults.get(realmIndex).row.getLong(animateExtraColumnIndex));
+            } else if (animateExtraIdType == ColumnType.STRING) {
+                return rowPrimaryIdStr +
+                        realmResults.get(realmIndex).row.getString(animateExtraColumnIndex);
+            } else {
+                throw new IllegalStateException("Unknown animateExtraIdType");
+            }
+        } else {
+            return rowPrimaryId;
         }
     }
 

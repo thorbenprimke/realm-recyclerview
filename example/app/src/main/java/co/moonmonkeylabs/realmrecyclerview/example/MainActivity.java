@@ -83,7 +83,12 @@ public class MainActivity extends AppCompatActivity {
         RealmResults<QuoteModel> quoteModels = realm
                 .where(QuoteModel.class)
                 .findAllSorted("id", (isLoadMore || isBulk) ? true : false);
-        quoteAdapter = new QuoteRecyclerViewAdapter(getBaseContext(), quoteModels, true, true);
+        quoteAdapter = new QuoteRecyclerViewAdapter(
+                getBaseContext(),
+                quoteModels,
+                true,
+                true,
+                isBulk ? "quote" : null);
         realmRecyclerView.setAdapter(quoteAdapter);
 
         realmRecyclerView.setOnRefreshListener(
@@ -154,8 +159,9 @@ public class MainActivity extends AppCompatActivity {
                 Context context,
                 RealmResults<QuoteModel> realmResults,
                 boolean automaticUpdate,
-                boolean animateIdType) {
-            super(context, realmResults, automaticUpdate, animateIdType, "quote");
+                boolean animateIdType,
+                String animateExtraColumnName) {
+            super(context, realmResults, automaticUpdate, animateIdType, animateExtraColumnName);
         }
 
         public class ViewHolder extends RealmViewHolder {
