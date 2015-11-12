@@ -3,5 +3,5 @@ include ':app'
 include 'library'
 project(':library').projectDir = new File(settingsDir, '../library')
 
-include 'data'
-project(':data').projectDir = new File(settingsDir, '../../realm-nytimes-data/library')
+//include 'data'
+//project(':data').projectDir = new File(settingsDir, '../../realm-nytimes-data/library')
