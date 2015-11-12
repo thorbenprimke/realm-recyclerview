@@ -1,5 +1,6 @@
 package co.moonmonkeylabs.realmrecyclerview.example;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -9,17 +10,27 @@ import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
+import co.moonmonkeylabs.realmrecyclerview.example.models.TodoItem;
+import io.realm.Realm;
+import io.realm.RealmBasedRecyclerViewAdapter;
+import io.realm.RealmConfiguration;
+import io.realm.RealmResults;
+import io.realm.RealmViewHolder;
 
 /**
  * A TO-DO app example showcasing the {@link RealmRecyclerView} with swipe to delete.
  */
 public class ToDoActivity extends AppCompatActivity {
+
+    private Realm realm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +46,28 @@ public class ToDoActivity extends AppCompatActivity {
                 buildAndShowInputDialog();
             }
         });
+
+        RealmRecyclerView realmRecyclerView =
+                (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
+
+        resetRealm();
+        realm = Realm.getInstance(this);
+        RealmResults<TodoItem> toDoItems = realm
+                .where(TodoItem.class)
+                .findAllSorted("id", true);
+        final ToDoRealmAdapter toDoRealmAdapter = new ToDoRealmAdapter(
+                getBaseContext(),
+                toDoItems);
+        realmRecyclerView.setAdapter(toDoRealmAdapter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (realm != null) {
+            realm.close();
+            realm = null;
+        }
     }
 
     private void buildAndShowInputDialog() {
@@ -83,5 +116,49 @@ public class ToDoActivity extends AppCompatActivity {
                     .show();
             return;
         }
+
+        realm.beginTransaction();
+        TodoItem todoItem = realm.createObject(TodoItem.class);
+        todoItem.setId(System.currentTimeMillis());
+        todoItem.setToDo(toDoItemText);
+        realm.commitTransaction();
+    }
+
+    public class ToDoRealmAdapter
+            extends RealmBasedRecyclerViewAdapter<TodoItem, ToDoRealmAdapter.ViewHolder> {
+
+        public class ViewHolder extends RealmViewHolder {
+
+            public TextView todoTextView;
+            public ViewHolder(FrameLayout container) {
+                super(container);
+                this.todoTextView = (TextView) container.findViewById(R.id.todo_text_view);
+            }
+        }
+
+        public ToDoRealmAdapter(Context context, RealmResults<TodoItem> realmResults) {
+            super(context, realmResults, true, true);
+        }
+
+        @Override
+        public ViewHolder onCreateRealmViewHolder(ViewGroup viewGroup, int viewType) {
+            View v = inflater.inflate(R.layout.to_do_item_view, viewGroup, false);
+            ViewHolder vh = new ViewHolder((FrameLayout) v);
+            return vh;
+        }
+
+        @Override
+        public void onBindRealmViewHolder(ViewHolder viewHolder, int position) {
+            final TodoItem toDoItem = realmResults.get(position);
+            viewHolder.todoTextView.setText(toDoItem.getToDo());
+        }
+    }
+
+    private void resetRealm() {
+        RealmConfiguration realmConfig = new RealmConfiguration
+                .Builder(this)
+                .deleteRealmIfMigrationNeeded()
+                .build();
+        Realm.deleteRealm(realmConfig);
     }
 }
