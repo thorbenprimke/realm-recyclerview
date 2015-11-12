@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -24,6 +25,9 @@ import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
 
 public class GridExampleActivity extends AppCompatActivity {
+
+    private static final String REPLACE_WITH_YOUR_API_KEY = "YOUR_API_KEY";
+    private static final String NY_TIMES_API_KEY = REPLACE_WITH_YOUR_API_KEY;
 
     private RealmRecyclerView realmRecyclerView;
     private NYTimesStoryRecyclerViewAdapter nyTimesStoryAdapter;
@@ -49,8 +53,12 @@ public class GridExampleActivity extends AppCompatActivity {
         nyTimesStoryAdapter = new NYTimesStoryRecyclerViewAdapter(this, nyTimesStories, true, true);
         realmRecyclerView.setAdapter(nyTimesStoryAdapter);
 
-        final NYTimesDataLoader nyTimesDataLoader = new NYTimesDataLoader();
-        nyTimesDataLoader.loadAllData(realm, "YOUR_NY_TIMES_API_KEY");
+        if (NY_TIMES_API_KEY.equals(REPLACE_WITH_YOUR_API_KEY)) {
+            Toast.makeText(this, "You need to add the NYTimes API key", Toast.LENGTH_LONG).show();
+        } else {
+            final NYTimesDataLoader nyTimesDataLoader = new NYTimesDataLoader();
+            nyTimesDataLoader.loadAllData(realm, NY_TIMES_API_KEY);
+        }
     }
 
     @Override
