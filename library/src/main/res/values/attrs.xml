@@ -10,5 +10,6 @@
         </attr>
         <attr name="rrvGridLayoutSpanCount" format="integer"/>
         <attr name="rrvHeaderColumnName" format="string"/>
+        <attr name="rrvSwipeToDelete" format="boolean"/>
     </declare-styleable>
 </resources>

@@ -6,11 +6,11 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.tonicartos.superslim.LayoutManager;
 
@@ -42,6 +42,7 @@ public class RealmRecyclerView extends FrameLayout {
     private RecyclerView recyclerView;
     private ViewStub emptyContentContainer;
     private RealmBasedRecyclerViewAdapter adapter;
+    private RealmSimpleItemTouchHelperCallback realmSimpleItemTouchHelperCallback;
     private boolean hasLoadMoreFired;
     private boolean showShowLoadMore;
 
@@ -50,6 +51,7 @@ public class RealmRecyclerView extends FrameLayout {
     private int emptyViewId;
     private Type type;
     private int gridSpanCount;
+    private boolean swipeToDelete;
 
     // State
     private boolean isRefreshing;
@@ -100,6 +102,7 @@ public class RealmRecyclerView extends FrameLayout {
                 break;
 
             case Grid:
+                throwIfSwipeToDeleteEnabled();
                 if (gridSpanCount == -1) {
                     throw new IllegalStateException("For GridLayout, a span count has to be set");
                 }
@@ -107,6 +110,7 @@ public class RealmRecyclerView extends FrameLayout {
                 break;
 
             case LinearLayoutWithHeaders:
+                throwIfSwipeToDeleteEnabled();
                 recyclerView.setLayoutManager(new LayoutManager(getContext()));
                 break;
 
@@ -137,6 +141,20 @@ public class RealmRecyclerView extends FrameLayout {
                     }
                 }
         );
+
+        if (swipeToDelete) {
+            realmSimpleItemTouchHelperCallback = new RealmSimpleItemTouchHelperCallback();
+            new ItemTouchHelper(realmSimpleItemTouchHelperCallback)
+                    .attachToRecyclerView(recyclerView);
+        }
+    }
+
+    private void throwIfSwipeToDeleteEnabled() {
+        if (!swipeToDelete) {
+            return;
+        }
+        throw new IllegalStateException(
+                "SwipeToDelete not supported with this layout type: " + type.name());
     }
 
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
@@ -208,12 +226,17 @@ public class RealmRecyclerView extends FrameLayout {
             type = Type.values()[typeValue];
         }
         gridSpanCount = typedArray.getInt(R.styleable.RealmRecyclerView_rrvGridLayoutSpanCount, -1);
+        swipeToDelete =
+                typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
         typedArray.recycle();
     }
 
     public void setAdapter(final RealmBasedRecyclerViewAdapter adapter) {
         this.adapter = adapter;
         recyclerView.setAdapter(adapter);
+        if (swipeToDelete) {
+            realmSimpleItemTouchHelperCallback.setAdapter(adapter);
+        }
 
         if (adapter != null) {
             adapter.registerAdapterDataObserver(

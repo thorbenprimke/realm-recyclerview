@@ -21,7 +21,8 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['diffutils-1.2.1.jar'])
 
-    compile 'com.android.support:recyclerview-v7:22.0.+'
+    compile 'com.android.support:design:22.2.1'
+    compile 'com.android.support:recyclerview-v7:22.2.1'
     compile 'io.realm:realm-android:0.84.1'
 
     compile 'com.github.TonicArtos:SuperSLiM:ed0ba4b4d2'

@@ -11,5 +11,6 @@
         app:rrvIsRefreshable="true"
         app:rrvEmptyLayoutId="@layout/empty_view"
         app:rrvLayoutType="LinearLayout"
+        app:rrvSwipeToDelete="true"
         />
 </RelativeLayout>

@@ -501,5 +501,18 @@ public abstract class RealmBasedRecyclerViewAdapter
         loadMoreItem = null;
         notifyDataSetChanged();
     }
+
+    /**
+     * Called when an item has been dismissed by a swipe.
+     *
+     * Only supported with type linearLayout and thus the realmResults can be accessed directly.
+     * If it is extended to LinearLayoutWithHeaders, rowWrappers will have to be used.
+     */
+    public void onItemSwipedDismiss(int position) {
+        final Realm realm = realmResults.getRealm();
+        realm.beginTransaction();
+        realmResults.get(position).removeFromRealm();
+        realm.commitTransaction();
+    }
 }
 
