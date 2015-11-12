@@ -78,5 +78,16 @@ public class LayoutSelectorActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        final Button toDoButton = (Button) findViewById(R.id.recycler_to_do_button);
+        toDoButton.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(LayoutSelectorActivity.this, ToDoActivity.class);
+                        startActivity(intent);
+                    }
+                }
+        );
     }
 }
