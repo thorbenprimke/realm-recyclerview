@@ -10,12 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:padding="4dp"
-        android:textStyle="bold"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1px"
-        android:layout_gravity="bottom"
-        android:background="#CFCFCF"
+        android:textSize="32sp"
+        android:textColor="@android:color/white"
         />
 </FrameLayout>

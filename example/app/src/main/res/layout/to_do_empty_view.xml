@@ -10,6 +10,6 @@
         android:layout_gravity="center"
         android:gravity="center_horizontal"
         android:text="@string/to_do_empty_item_message"
+        android:textSize="24sp"
         />
-
 </FrameLayout>

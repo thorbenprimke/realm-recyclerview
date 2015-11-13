@@ -10,6 +10,6 @@
     <string name="section_demo">Section Header Layout Example</string>
     <string name="to_do_demo">Todo Demo</string>
 
-    <string name="title_activity_to_do">@string/to_do_demo</string>
+    <string name="title_activity_to_do">To-Do List</string>
     <string name="to_do_empty_item_message">Looks like you are all done\n(or haven\'t added anything)!</string>
 </resources>

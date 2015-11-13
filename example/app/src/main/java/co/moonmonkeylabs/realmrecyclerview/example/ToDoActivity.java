@@ -2,6 +2,7 @@ package co.moonmonkeylabs.realmrecyclerview.example;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
@@ -29,6 +30,17 @@ import io.realm.RealmViewHolder;
  * A TO-DO app example showcasing the {@link RealmRecyclerView} with swipe to delete.
  */
 public class ToDoActivity extends AppCompatActivity {
+
+    private static final int[] COLORS = new int[] {
+            Color.argb(255, 28, 160, 170),
+            Color.argb(255, 99, 161, 247),
+            Color.argb(255, 13, 79, 139),
+            Color.argb(255, 89, 113, 173),
+            Color.argb(255, 200, 213, 219),
+            Color.argb(255, 99, 214, 74),
+            Color.argb(255, 205, 92, 92),
+            Color.argb(255, 105, 5, 98)
+    };
 
     private Realm realm;
 
@@ -112,7 +124,7 @@ public class ToDoActivity extends AppCompatActivity {
     private void addToDoItem(String toDoItemText) {
         if (toDoItemText == null || toDoItemText.length() == 0) {
             Toast
-                    .makeText(this, "Empty ToDos cannot get stuff done!", Toast.LENGTH_SHORT)
+                    .makeText(this, "Empty ToDos don't get stuff done!", Toast.LENGTH_SHORT)
                     .show();
             return;
         }
@@ -151,6 +163,9 @@ public class ToDoActivity extends AppCompatActivity {
         public void onBindRealmViewHolder(ViewHolder viewHolder, int position) {
             final TodoItem toDoItem = realmResults.get(position);
             viewHolder.todoTextView.setText(toDoItem.getToDo());
+            viewHolder.itemView.setBackgroundColor(
+                    COLORS[(int) (toDoItem.getId() % COLORS.length)]
+            );
         }
     }
 
