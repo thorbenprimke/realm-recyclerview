@@ -11,15 +11,7 @@ public class TodoItem extends RealmObject {
     @PrimaryKey
     private long id;
 
-    private String toDo;
-
-    public TodoItem() {
-    }
-
-    public TodoItem(long id, String toDo) {
-        this.id = id;
-        this.toDo = toDo;
-    }
+    private String description;
 
     public long getId() {
         return id;
@@ -29,11 +21,11 @@ public class TodoItem extends RealmObject {
         this.id = id;
     }
 
-    public String getToDo() {
-        return toDo;
+    public String getDescription() {
+        return description;
     }
 
-    public void setToDo(String toDo) {
-        this.toDo = toDo;
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

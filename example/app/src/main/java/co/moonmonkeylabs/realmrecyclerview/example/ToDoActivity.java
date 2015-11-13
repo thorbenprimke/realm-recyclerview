@@ -59,17 +59,15 @@ public class ToDoActivity extends AppCompatActivity {
             }
         });
 
-        RealmRecyclerView realmRecyclerView =
-                (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
-
         resetRealm();
         realm = Realm.getInstance(this);
         RealmResults<TodoItem> toDoItems = realm
                 .where(TodoItem.class)
                 .findAllSorted("id", true);
-        final ToDoRealmAdapter toDoRealmAdapter = new ToDoRealmAdapter(
-                getBaseContext(),
-                toDoItems);
+        ToDoRealmAdapter toDoRealmAdapter =
+                new ToDoRealmAdapter(this, toDoItems, true, true);
+        RealmRecyclerView realmRecyclerView =
+                (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
         realmRecyclerView.setAdapter(toDoRealmAdapter);
     }
 
@@ -132,7 +130,7 @@ public class ToDoActivity extends AppCompatActivity {
         realm.beginTransaction();
         TodoItem todoItem = realm.createObject(TodoItem.class);
         todoItem.setId(System.currentTimeMillis());
-        todoItem.setToDo(toDoItemText);
+        todoItem.setDescription(toDoItemText);
         realm.commitTransaction();
     }
 
@@ -148,8 +146,12 @@ public class ToDoActivity extends AppCompatActivity {
             }
         }
 
-        public ToDoRealmAdapter(Context context, RealmResults<TodoItem> realmResults) {
-            super(context, realmResults, true, true);
+        public ToDoRealmAdapter(
+                Context context,
+                RealmResults<TodoItem> realmResults,
+                boolean automaticUpdate,
+                boolean animateResults) {
+            super(context, realmResults, automaticUpdate, animateResults);
         }
 
         @Override
@@ -162,7 +164,7 @@ public class ToDoActivity extends AppCompatActivity {
         @Override
         public void onBindRealmViewHolder(ViewHolder viewHolder, int position) {
             final TodoItem toDoItem = realmResults.get(position);
-            viewHolder.todoTextView.setText(toDoItem.getToDo());
+            viewHolder.todoTextView.setText(toDoItem.getDescription());
             viewHolder.itemView.setBackgroundColor(
                     COLORS[(int) (toDoItem.getId() % COLORS.length)]
             );

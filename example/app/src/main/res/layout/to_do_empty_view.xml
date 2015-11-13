@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center_horizontal"
-        android:text="@string/to_do_empty_item_message"
+        android:text="Looks like you are all done\n(or haven\'t added anything)!"
         android:textSize="24sp"
         />
 </FrameLayout>
