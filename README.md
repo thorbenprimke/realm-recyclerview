@@ -19,7 +19,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 ```
 	dependencies {
-	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.4'
+	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.5'
 	}
 ```
 
@@ -61,6 +61,8 @@ All these will yield vertical linear or grid layouts.
 ```rrvEmptyLayoutId```: A custom empty state view can be provided via this attribute. Whenever the list has no item, the empty state is shown. 
 
 ```rrvGridLayoutSpanCount```: This attribute has to be set with an integer greater than zero when the ```rrvLayoutType``` is set to ```Grid```. 
+
+```rrvSwipeToDelete```: This attribute is only supported with ```rrvLayoutType``` of ```LinearLayout```. If set to true, swiping a row to delete is enabled. The row is deleted from the ```Realm``` directly.
 
 ##RealmBasedRecyclerViewAdapter: 
 
