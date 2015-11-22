@@ -1,48 +1,53 @@
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/recycler_grid_button"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:text="@string/grid_demo"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/recycler_to_do_button"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:text="@string/to_do_demo"/>
+        <Button
+            android:id="@+id/recycler_grid_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/grid_demo"/>
 
-    <Button
-        android:id="@+id/recycler_linear_button"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:text="@string/linear_demo"/>
+        <Button
+            android:id="@+id/recycler_to_do_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/to_do_demo"/>
 
-    <Button
-        android:id="@+id/recycler_linear_bulk_button"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:text="@string/linear_bulk_demo"/>
+        <Button
+            android:id="@+id/recycler_linear_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/linear_demo"/>
 
-    <Button
-        android:id="@+id/recycler_linear_with_load_more_button"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:text="@string/linear_with_load_more_demo"/>
+        <Button
+            android:id="@+id/recycler_linear_bulk_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/linear_bulk_demo"/>
 
-    <Button
-        android:id="@+id/recycler_section_header_button"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_margin="20dp"
-        android:text="@string/section_demo"/>
-</LinearLayout>
+        <Button
+            android:id="@+id/recycler_linear_with_load_more_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/linear_with_load_more_demo"/>
+
+        <Button
+            android:id="@+id/recycler_section_header_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/section_demo"/>
+    </LinearLayout>
+</ScrollView>
