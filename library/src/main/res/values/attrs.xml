@@ -9,7 +9,7 @@
             <enum name="LinearLayoutWithHeaders" value="2"/>
         </attr>
         <attr name="rrvGridLayoutSpanCount" format="integer"/>
-        <attr name="rrvGridLayoutItemWidth" format="integer"/>
+        <attr name="rrvGridLayoutItemWidth" format="dimension"/>
         <attr name="rrvHeaderColumnName" format="string"/>
         <attr name="rrvSwipeToDelete" format="boolean"/>
     </declare-styleable>
