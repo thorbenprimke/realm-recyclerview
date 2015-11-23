@@ -57,6 +57,8 @@ public class RealmRecyclerView extends FrameLayout {
     private GridLayoutManager gridManager;
     private boolean swipeToDelete;
 
+    private int lastMeasuredWidth = -1;
+
     // State
     private boolean isRefreshing;
 
@@ -82,9 +84,10 @@ public class RealmRecyclerView extends FrameLayout {
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
-        if (gridWidth != -1 && gridManager != null) {
+        if (gridWidth != -1 && gridManager != null && lastMeasuredWidth != getMeasuredWidth()) {
             int spanCount = Math.max(1, getMeasuredWidth() / gridWidth);
             gridManager.setSpanCount(spanCount);
+            lastMeasuredWidth = getMeasuredWidth();
         }
     }
 
