@@ -51,7 +51,7 @@ public class RealmRecyclerView extends FrameLayout {
     private int emptyViewId;
     private Type type;
     private int gridSpanCount;
-    private int gridWidth;
+    private int gridWidthPx;
     private boolean swipeToDelete;
 
     private GridLayoutManager gridManager;
@@ -82,8 +82,8 @@ public class RealmRecyclerView extends FrameLayout {
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
-        if (gridWidth != -1 && gridManager != null && lastMeasuredWidth != getMeasuredWidth()) {
-            int spanCount = Math.max(1, getMeasuredWidth() / gridWidth);
+        if (gridWidthPx != -1 && gridManager != null && lastMeasuredWidth != getMeasuredWidth()) {
+            int spanCount = Math.max(1, getMeasuredWidth() / gridWidthPx);
             gridManager.setSpanCount(spanCount);
             lastMeasuredWidth = getMeasuredWidth();
         }
@@ -117,16 +117,16 @@ public class RealmRecyclerView extends FrameLayout {
 
             case Grid:
                 throwIfSwipeToDeleteEnabled();
-                if (gridSpanCount == -1 && gridWidth == -1) {
+                if (gridSpanCount == -1 && gridWidthPx == -1) {
                     throw new IllegalStateException(
                             "For GridLayout, a span count or item width has to be set");
-                } else if(gridSpanCount != -1 && gridWidth != -1) {
+                } else if(gridSpanCount != -1 && gridWidthPx != -1) {
                     // This is awkward. Both values are set. Instead of picking one, throw an error.
                     throw new IllegalStateException(
                             "For GridLayout, a span count and item width can not both be set");
                 }
                 // Uses either the provided gridSpanCount or 1 as a placeholder what will be
-                // calculated based on gridWidth in onMeasure.
+                // calculated based on gridWidthPx in onMeasure.
                 int spanCount = gridSpanCount == -1 ? 1 : gridSpanCount;
                 gridManager = new GridLayoutManager(getContext(), spanCount);
                 recyclerView.setLayoutManager(gridManager);
@@ -249,7 +249,7 @@ public class RealmRecyclerView extends FrameLayout {
             type = Type.values()[typeValue];
         }
         gridSpanCount = typedArray.getInt(R.styleable.RealmRecyclerView_rrvGridLayoutSpanCount, -1);
-        gridWidth = typedArray
+        gridWidthPx = typedArray
                 .getDimensionPixelSize(R.styleable.RealmRecyclerView_rrvGridLayoutItemWidth, -1);
         swipeToDelete =
                 typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
