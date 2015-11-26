@@ -14,8 +14,6 @@ import android.widget.FrameLayout;
 
 import com.tonicartos.superslim.LayoutManager;
 
-import java.lang.Override;
-
 import io.realm.RealmBasedRecyclerViewAdapter;
 
 /**
@@ -54,9 +52,9 @@ public class RealmRecyclerView extends FrameLayout {
     private Type type;
     private int gridSpanCount;
     private int gridWidth;
-    private GridLayoutManager gridManager;
     private boolean swipeToDelete;
 
+    private GridLayoutManager gridManager;
     private int lastMeasuredWidth = -1;
 
     // State
@@ -120,18 +118,18 @@ public class RealmRecyclerView extends FrameLayout {
             case Grid:
                 throwIfSwipeToDeleteEnabled();
                 if (gridSpanCount == -1 && gridWidth == -1) {
-                    throw new IllegalStateException("For GridLayout, a span count or item width has to be set");
+                    throw new IllegalStateException(
+                            "For GridLayout, a span count or item width has to be set");
                 } else if(gridSpanCount != -1 && gridWidth != -1) {
-                    //This is awkward. Both values are set. Instead of picking one, throw an error.
-                    throw new IllegalStateException("For GridLayout, a span count and item width can not both be set");
-                } else if(gridWidth == -1) {
-                    //Do original path of setting grid span.
-                    recyclerView.setLayoutManager(new GridLayoutManager(getContext(), gridSpanCount));
-                } else if(gridSpanCount == -1) {
-                    //Set to one column, but remember this will change automatically based on width during measure.
-                    gridManager = new GridLayoutManager(getContext(), 1);
-                    recyclerView.setLayoutManager(gridManager);
+                    // This is awkward. Both values are set. Instead of picking one, throw an error.
+                    throw new IllegalStateException(
+                            "For GridLayout, a span count and item width can not both be set");
                 }
+                // Uses either the provided gridSpanCount or 1 as a placeholder what will be
+                // calculated based on gridWidth in onMeasure.
+                int spanCount = gridSpanCount == -1 ? 1 : gridSpanCount;
+                gridManager = new GridLayoutManager(getContext(), spanCount);
+                recyclerView.setLayoutManager(gridManager);
                 break;
 
             case LinearLayoutWithHeaders:
@@ -251,7 +249,8 @@ public class RealmRecyclerView extends FrameLayout {
             type = Type.values()[typeValue];
         }
         gridSpanCount = typedArray.getInt(R.styleable.RealmRecyclerView_rrvGridLayoutSpanCount, -1);
-        gridWidth = typedArray.getDimensionPixelSize(R.styleable.RealmRecyclerView_rrvGridLayoutItemWidth, -1);
+        gridWidth = typedArray
+                .getDimensionPixelSize(R.styleable.RealmRecyclerView_rrvGridLayoutItemWidth, -1);
         swipeToDelete =
                 typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
         typedArray.recycle();
@@ -268,7 +267,10 @@ public class RealmRecyclerView extends FrameLayout {
             adapter.registerAdapterDataObserver(
                     new RecyclerView.AdapterDataObserver() {
                         @Override
-                        public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount) {
+                        public void onItemRangeMoved(
+                                int fromPosition,
+                                int toPosition,
+                                int itemCount) {
                             super.onItemRangeMoved(fromPosition, toPosition, itemCount);
                             update();
                         }
