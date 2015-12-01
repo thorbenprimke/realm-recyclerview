@@ -107,7 +107,7 @@ public class MainActivity2 extends AppCompatActivity {
 
         @Override
         public void onBindRealmViewHolder(ViewHolder viewHolder, int position) {
-            final CountryModel quoteModel = realmResults.get(rowWrappers.get(position).realmIndex);
+            final CountryModel quoteModel = realmResults.get(position);
             viewHolder.countryTextView.setText(quoteModel.getName());
             viewHolder.countryTextView.setOnClickListener(
                     new View.OnClickListener() {

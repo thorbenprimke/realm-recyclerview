@@ -19,7 +19,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 ```
 	dependencies {
-	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.6'
+	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.7'
 	}
 ```
 

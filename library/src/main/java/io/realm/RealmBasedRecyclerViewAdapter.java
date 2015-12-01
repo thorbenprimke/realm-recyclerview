@@ -83,7 +83,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     protected RealmResults<T> realmResults;
     protected List ids;
 
-    protected List<RowWrapper> rowWrappers;
+    private List<RowWrapper> rowWrappers;
 
     private RealmChangeListener listener;
     private boolean animateResults;
@@ -238,7 +238,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                     }
                     layoutParams.isHeader = true;
                 } else {
-                    onBindRealmViewHolder((VH) holder, position);
+                    onBindRealmViewHolder((VH) holder, rowWrappers.get(position).realmIndex);
                 }
                 layoutParams.setSlm(LinearSLM.ID);
                 if (header != null) {
