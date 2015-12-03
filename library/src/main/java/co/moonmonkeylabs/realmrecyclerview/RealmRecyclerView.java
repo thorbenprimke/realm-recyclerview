@@ -315,6 +315,10 @@ public class RealmRecyclerView extends FrameLayout {
         emptyContentContainer.setVisibility(
                 adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
     }
+    
+    public void smoothScrollToPosition(int position) {
+        recyclerView.smoothScrollToPosition(position);
+    }
 
     //
     // Pull-to-refresh
