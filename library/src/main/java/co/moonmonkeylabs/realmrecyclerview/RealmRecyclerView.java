@@ -317,6 +317,19 @@ public class RealmRecyclerView extends FrameLayout {
     }
 
     //
+    // Expose public RecyclerView methods to the RealmRecyclerView
+    //
+    
+    
+    public void setItemViewCacheSize(int size) {
+        recyclerView.setItemViewCacheSize(size);
+    }
+
+    public void smoothScrollToPosition(int position) {
+        recyclerView.smoothScrollToPosition(position);
+    }
+
+    //
     // Pull-to-refresh
     //
 
