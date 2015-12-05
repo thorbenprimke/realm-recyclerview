@@ -40,7 +40,7 @@ dependencies {
 
     // The library reference
 //    compile project(':library')
-    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.7'
+    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.8'
 
     // The date project reference
 //        compile project(':data')

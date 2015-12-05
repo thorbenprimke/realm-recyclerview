@@ -8,4 +8,10 @@
         android:title="Add Quote"
         android:orderInCategory="100"
         app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/action_add_footer"
+        android:title="Add Footer"
+        android:orderInCategory="100"
+        app:showAsAction="always"/>
 </menu>

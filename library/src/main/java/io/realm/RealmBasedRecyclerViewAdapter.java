@@ -75,9 +75,11 @@ public abstract class RealmBasedRecyclerViewAdapter
     private static final List<Long> EMPTY_LIST = new ArrayList<>(0);
 
     private Object loadMoreItem;
+    private Object footerItem;
 
     protected final int HEADER_VIEW_TYPE = 100;
     private final int LOAD_MORE_VIEW_TYPE = 101;
+    private final int FOOTER_VIEW_TYPE = 102;
 
     protected LayoutInflater inflater;
     protected RealmResults<T> realmResults;
@@ -201,16 +203,26 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public abstract void onBindRealmViewHolder(VH holder, int position);
 
+    public VH onCreateFooterViewHolder(ViewGroup viewGroup) {
+        throw new IllegalStateException("Implementation missing");
+    }
+
+    public void onBindFooterViewHolder(VH holder, int position) {
+        throw new IllegalStateException("Implementation missing");
+    }
+
     /**
      * DON'T OVERRIDE THIS METHOD. Implement onCreateRealmViewHolder instead.
      */
     @Override
-    public RealmViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+    public final RealmViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         if (viewType == HEADER_VIEW_TYPE) {
             View view = inflater.inflate(R.layout.header_item, viewGroup, false);
             return new RealmViewHolder((TextView) view);
         } else if (viewType == LOAD_MORE_VIEW_TYPE) {
             return new RealmViewHolder(new LoadMoreListItemView(viewGroup.getContext()));
+        } else if (viewType == FOOTER_VIEW_TYPE) {
+            return onCreateFooterViewHolder(viewGroup);
         }
         return onCreateRealmViewHolder(viewGroup, viewType);
     }
@@ -220,9 +232,11 @@ public abstract class RealmBasedRecyclerViewAdapter
      */
     @Override
     @SuppressWarnings("unchecked")
-    public void onBindViewHolder(RealmViewHolder holder, int position) {
+    public final void onBindViewHolder(RealmViewHolder holder, int position) {
         if (getItemViewType(position) == LOAD_MORE_VIEW_TYPE) {
             holder.loadMoreView.showSpinner();
+        } else if (getItemViewType(position) == FOOTER_VIEW_TYPE) {
+            onBindFooterViewHolder((VH) holder, position);
         } else {
             if (addSectionHeaders) {
                 final String header = rowWrappers.get(position).header;
@@ -263,21 +277,25 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     @Override
     public int getItemCount() {
-        int loadMoreCount = loadMoreItem == null ? 0 : 1;
+        int extraCount = loadMoreItem == null ? 0 : 1;
+        extraCount += footerItem == null ? 0 : 1;
+
         if (addSectionHeaders) {
-            return rowWrappers.size() + loadMoreCount;
+            return rowWrappers.size() + extraCount;
         }
 
         if (realmResults == null) {
-            return 0;
+            return extraCount;
         }
-        return realmResults.size() + loadMoreCount;
+        return realmResults.size() + extraCount;
     }
 
     @Override
     public int getItemViewType(int position) {
         if (loadMoreItem != null && position == getItemCount() - 1) {
             return LOAD_MORE_VIEW_TYPE;
+        } else if (footerItem != null && position == getItemCount() - 1) {
+            return FOOTER_VIEW_TYPE;
         } else if (!rowWrappers.isEmpty() && !rowWrappers.get(position).isRealm) {
             return HEADER_VIEW_TYPE;
         }
@@ -484,7 +502,7 @@ public abstract class RealmBasedRecyclerViewAdapter
      * Adds the LoadMore item.
      */
     public void addLoadMore() {
-        if (loadMoreItem != null) {
+        if (loadMoreItem != null || footerItem != null) {
             return;
         }
         loadMoreItem = new Object();
@@ -499,6 +517,28 @@ public abstract class RealmBasedRecyclerViewAdapter
             return;
         }
         loadMoreItem = null;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Adds the Footer item.
+     */
+    public void addFooter() {
+        if (footerItem != null || loadMoreItem != null) {
+            return;
+        }
+        footerItem = new Object();
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Removes the Footer;
+     */
+    public void removeFooter() {
+        if (footerItem == null) {
+            return;
+        }
+        footerItem = null;
         notifyDataSetChanged();
     }
 
