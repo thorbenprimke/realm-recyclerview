@@ -25,6 +25,7 @@ import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
+import io.realm.Sort;
 
 /**
  * A TO-DO app example showcasing the {@link RealmRecyclerView} with swipe to delete.
@@ -63,7 +64,7 @@ public class ToDoActivity extends AppCompatActivity {
         realm = Realm.getInstance(this);
         RealmResults<TodoItem> toDoItems = realm
                 .where(TodoItem.class)
-                .findAllSorted("id", true);
+                .findAllSorted("id", Sort.ASCENDING);
         ToDoRealmAdapter toDoRealmAdapter =
                 new ToDoRealmAdapter(this, toDoItems, true, true);
         RealmRecyclerView realmRecyclerView =

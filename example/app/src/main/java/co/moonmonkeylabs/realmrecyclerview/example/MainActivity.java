@@ -23,6 +23,7 @@ import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
+import io.realm.Sort;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         RealmResults<QuoteModel> quoteModels = realm
                 .where(QuoteModel.class)
-                .findAllSorted("id", (isLoadMore || isBulk) ? true : false);
+                .findAllSorted("id", (isLoadMore || isBulk) ? Sort.ASCENDING : Sort.DESCENDING);
         quoteAdapter = new QuoteRecyclerViewAdapter(
                 getBaseContext(),
                 quoteModels,

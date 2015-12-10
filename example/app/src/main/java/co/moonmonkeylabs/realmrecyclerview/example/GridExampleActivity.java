@@ -23,6 +23,7 @@ import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
+import io.realm.Sort;
 
 public class GridExampleActivity extends AppCompatActivity {
 
@@ -49,7 +50,7 @@ public class GridExampleActivity extends AppCompatActivity {
         Realm.setDefaultConfiguration(getRealmConfig());
         realm = Realm.getDefaultInstance();
         RealmResults<NYTimesStory> nyTimesStories =
-                realm.where(NYTimesStory.class).findAllSorted("sortTimeStamp", false);
+                realm.where(NYTimesStory.class).findAllSorted("sortTimeStamp", Sort.DESCENDING);
         nyTimesStoryAdapter = new NYTimesStoryRecyclerViewAdapter(this, nyTimesStories, true, true);
         realmRecyclerView.setAdapter(nyTimesStoryAdapter);
 

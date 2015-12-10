@@ -18,6 +18,7 @@ import io.realm.RealmBasedRecyclerViewAdapter;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
+import io.realm.Sort;
 
 public class MainActivity2 extends AppCompatActivity {
 
@@ -49,7 +50,7 @@ public class MainActivity2 extends AppCompatActivity {
         realm.commitTransaction();
 
         RealmResults<CountryModel> countryModels =
-                realm.where(CountryModel.class).findAllSorted("name", true);
+                realm.where(CountryModel.class).findAllSorted("name", Sort.ASCENDING);
         countryAdapter = new CountryRecyclerViewAdapter(getBaseContext(), countryModels);
         realmRecyclerView.setAdapter(countryAdapter);
     }

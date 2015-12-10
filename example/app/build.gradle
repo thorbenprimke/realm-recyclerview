@@ -38,8 +38,8 @@ dependencies {
     compile 'com.github.bumptech.glide:glide:3.6.1'
     // The library reference
     //    compile project(':library')
-    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.9'
+    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.10'
     // The date project reference
     //        compile project(':data')
-    compile 'com.github.thorbenprimke:realm-nytimes-data:0.9.1'
+    compile 'com.github.thorbenprimke:realm-nytimes-data:0.9.2'
 }
