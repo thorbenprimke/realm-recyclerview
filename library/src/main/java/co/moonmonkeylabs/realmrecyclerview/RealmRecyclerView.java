@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewStub;
 import android.widget.FrameLayout;
-
 import com.tonicartos.superslim.LayoutManager;
 
 import io.realm.RealmBasedRecyclerViewAdapter;
@@ -170,6 +169,19 @@ public class RealmRecyclerView extends FrameLayout {
             new ItemTouchHelper(realmSimpleItemTouchHelperCallback)
                     .attachToRecyclerView(recyclerView);
         }
+    }
+
+    /**
+     * Sets the orientation of the layout. {@link android.support.v7.widget.LinearLayoutManager}
+     * will do its best to keep scroll position.
+     *
+     * @param orientation {@link #HORIZONTAL} or {@link #VERTICAL}
+     */
+    public void setOrientation(int orientation) {
+        if(gridManager == null) {
+            throw new IllegalStateException("Error init of GridLayoutManager");
+        }
+        gridManager.setOrientation(orientation);
     }
 
     private void throwIfSwipeToDeleteEnabled() {
