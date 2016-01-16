@@ -306,6 +306,14 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     /**
+     * Ensure {@link #close()} is called whenever {@link Realm#close()} is called to ensure that the
+     * {@link #realmResults} are invalidated and the change listener removed.
+     */
+    public void close() {
+        updateRealmResults(null);
+    }
+
+    /**
      * Update the RealmResults associated with the Adapter. Useful when the query has been changed.
      * If the query does not change you might consider using the automaticUpdate feature.
      *
@@ -313,15 +321,15 @@ public abstract class RealmBasedRecyclerViewAdapter
      */
     public void updateRealmResults(RealmResults<T> queryResults) {
         if (listener != null) {
-            if (this.realmResults != null) {
-                this.realmResults.realm.removeChangeListener(listener);
-            }
-            if (queryResults != null) {
-                queryResults.realm.addChangeListener(listener);
+            if (realmResults != null) {
+                realmResults.realm.removeChangeListener(listener);
             }
         }
 
-        this.realmResults = queryResults;
+        realmResults = queryResults;
+        if (realmResults != null) {
+            realmResults.realm.addChangeListener(listener);
+        }
 
         updateRowWrappers();
         ids = getIdsOfRealmResults();
@@ -338,7 +346,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     private List getIdsOfRealmResults() {
-        if (!animateResults || realmResults.size() == 0) {
+        if (!animateResults || realmResults == null || realmResults.size() == 0) {
             return EMPTY_LIST;
         }
 
@@ -390,6 +398,9 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     private void updateRowWrappers() {
+        if (realmResults == null) {
+            return;
+        }
         if (addSectionHeaders) {
             String lastHeader = "";
             int headerCount = 0;
