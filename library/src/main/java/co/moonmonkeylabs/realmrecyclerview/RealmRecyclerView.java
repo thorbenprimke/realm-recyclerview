@@ -256,6 +256,18 @@ public class RealmRecyclerView extends FrameLayout {
         typedArray.recycle();
     }
 
+    public void addItemDecoration(RecyclerView.ItemDecoration decor) {
+        recyclerView.addItemDecoration(decor);
+    }
+
+    public void addItemDecoration(RecyclerView.ItemDecoration decor, int index) {
+        recyclerView.addItemDecoration(decor, index);
+    }
+
+    public void removeItemDecoration(RecyclerView.ItemDecoration decor) {
+        recyclerView.removeItemDecoration(decor);
+    }
+
     public void setAdapter(final RealmBasedRecyclerViewAdapter adapter) {
         this.adapter = adapter;
         recyclerView.setAdapter(adapter);
