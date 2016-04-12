@@ -210,14 +210,31 @@ public abstract class RealmBasedRecyclerViewAdapter
         throw new IllegalStateException("Implementation missing");
     }
 
+    public RealmViewHolder onCreateHeaderViewHolder(ViewGroup viewGroup) {
+        View view = inflater.inflate(R.layout.header_item, viewGroup, false);
+        return new RealmViewHolder((TextView) view);
+    }
+
+    public void onBindHeaderViewHolder(RealmViewHolder holder, int position) {
+        String header = rowWrappers.get(position).header;
+        final GridSLM.LayoutParams layoutParams =
+            GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
+
+        holder.headerTextView.setText(header);
+        if (layoutParams.isHeaderInline()) {
+            layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        } else {
+            layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        }
+    }
+
     /**
      * DON'T OVERRIDE THIS METHOD. Implement onCreateRealmViewHolder instead.
      */
     @Override
     public final RealmViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         if (viewType == HEADER_VIEW_TYPE) {
-            View view = inflater.inflate(R.layout.header_item, viewGroup, false);
-            return new RealmViewHolder((TextView) view);
+            return onCreateHeaderViewHolder(viewGroup);
         } else if (viewType == LOAD_MORE_VIEW_TYPE) {
             return new RealmViewHolder(new LoadMoreListItemView(viewGroup.getContext()));
         } else if (viewType == FOOTER_VIEW_TYPE) {
@@ -243,13 +260,8 @@ public abstract class RealmBasedRecyclerViewAdapter
                         GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
                 // Setup the header
                 if (header != null) {
-                    holder.headerTextView.setText(header);
-                    if (layoutParams.isHeaderInline()) {
-                        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-                    } else {
-                        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                    }
                     layoutParams.isHeader = true;
+                    onBindHeaderViewHolder(holder,position);
                 } else {
                     onBindRealmViewHolder((VH) holder, rowWrappers.get(position).realmIndex);
                 }
