@@ -353,6 +353,10 @@ public class RealmRecyclerView extends FrameLayout {
         recyclerView.smoothScrollToPosition(position);
     }
 
+    public void scrollToPosition(int position) {
+        recyclerView.scrollToPosition(position);
+    }
+
     //
     // Pull-to-refresh
     //
