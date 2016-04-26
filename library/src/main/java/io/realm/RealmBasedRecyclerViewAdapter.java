@@ -38,6 +38,8 @@ import difflib.Chunk;
 import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
+import io.realm.internal.RealmObjectProxy;
+import io.realm.internal.Row;
 import io.realm.internal.TableOrView;
 
 /**
@@ -334,13 +336,13 @@ public abstract class RealmBasedRecyclerViewAdapter
     public void updateRealmResults(RealmResults<T> queryResults) {
         if (listener != null) {
             if (realmResults != null) {
-                realmResults.realm.removeChangeListener(listener);
+                realmResults.removeChangeListener(listener);
             }
         }
 
         realmResults = queryResults;
         if (realmResults != null) {
-            realmResults.realm.addChangeListener(listener);
+            realmResults.addChangeListener(listener);
         }
 
         updateRowWrappers();
@@ -384,10 +386,13 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     private Object getRealmRowId(int realmIndex) {
         Object rowPrimaryId;
+        RealmObjectProxy proxy = (RealmObjectProxy) realmResults.get(realmIndex);
+        Row row = proxy.realmGet$proxyState().getRow$realm();
+
         if (animatePrimaryIdType == RealmFieldType.INTEGER) {
-            rowPrimaryId = realmResults.get(realmIndex).row.getLong(animatePrimaryColumnIndex);
+            rowPrimaryId = row.getLong(animatePrimaryColumnIndex);
         } else if (animatePrimaryIdType == RealmFieldType.STRING) {
-            rowPrimaryId = realmResults.get(realmIndex).row.getString(animatePrimaryColumnIndex);
+            rowPrimaryId = row.getString(animatePrimaryColumnIndex);
         } else {
             throw new IllegalStateException("Unknown animatedIdType");
         }
@@ -396,11 +401,9 @@ public abstract class RealmBasedRecyclerViewAdapter
             String rowPrimaryIdStr = (rowPrimaryId instanceof String)
                     ? (String) rowPrimaryId : String.valueOf(rowPrimaryId);
             if (animateExtraIdType == RealmFieldType.INTEGER) {
-                return rowPrimaryIdStr + String.valueOf(
-                        realmResults.get(realmIndex).row.getLong(animateExtraColumnIndex));
+                return rowPrimaryIdStr + String.valueOf(row.getLong(animateExtraColumnIndex));
             } else if (animateExtraIdType == RealmFieldType.STRING) {
-                return rowPrimaryIdStr +
-                        realmResults.get(realmIndex).row.getString(animateExtraColumnIndex);
+                return rowPrimaryIdStr + row.getString(animateExtraColumnIndex);
             } else {
                 throw new IllegalStateException("Unknown animateExtraIdType");
             }
@@ -422,7 +425,9 @@ public abstract class RealmBasedRecyclerViewAdapter
             final long headerIndex = realmResults.getTable().getColumnIndex(headerColumnName);
             int i = 0;
             for (RealmObject result : realmResults) {
-                String header = createHeaderFromColumnValue(result.row.getString(headerIndex));
+                String rawHeader = ((RealmObjectProxy) result)
+                        .realmGet$proxyState().getRow$realm().getString(headerIndex);
+                String header = createHeaderFromColumnValue(rawHeader);
                 if (!TextUtils.equals(lastHeader, header)) {
                     // Insert new header view and update section data.
                     sectionFirstPosition = i + headerCount;
@@ -573,7 +578,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     public void onItemSwipedDismiss(int position) {
         final BaseRealm realm = realmResults.realm;
         realm.beginTransaction();
-        realmResults.get(position).removeFromRealm();
+        realmResults.get(position).deleteFromRealm();
         realm.commitTransaction();
     }
 }

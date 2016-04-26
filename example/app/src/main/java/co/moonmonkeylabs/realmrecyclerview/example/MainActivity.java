@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                         instance.where(QuoteModel.class).equalTo("id", id).findFirst();
                 if (quoteModel != null) {
                     instance.beginTransaction();
-                    quoteModel.removeFromRealm();
+                    quoteModel.deleteFromRealm();
                     instance.commitTransaction();
                 }
                 instance.close();
