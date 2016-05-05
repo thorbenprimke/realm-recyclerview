@@ -444,7 +444,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     private RealmChangeListener getRealmChangeListener() {
         return new RealmChangeListener() {
             @Override
-            public void onChange() {
+            public void onChange(Object element) {
                 if (animateResults && ids != null && !ids.isEmpty()) {
                     updateRowWrappers();
                     List newIds = getIdsOfRealmResults();
