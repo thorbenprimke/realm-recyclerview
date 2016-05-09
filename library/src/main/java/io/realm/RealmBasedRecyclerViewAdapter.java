@@ -84,12 +84,12 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     private Context context;
     protected LayoutInflater inflater;
-    protected RealmResults<T> realmResults;
+    protected OrderedRealmCollection<T> realmResults;
     protected List ids;
 
     private List<RowWrapper> rowWrappers;
 
-    private RealmChangeListener<RealmResults<T>> listener;
+    private RealmChangeListener<OrderedRealmCollection<T>> listener;
     private boolean animateResults;
     private boolean addSectionHeaders;
     private String headerColumnName;
@@ -101,7 +101,7 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
-            RealmResults<T> realmResults,
+            OrderedRealmCollection<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults,
             String animateExtraColumnName) {
@@ -117,7 +117,7 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
-            RealmResults<T> realmResults,
+            OrderedRealmCollection<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults) {
         this(context, realmResults, automaticUpdate, animateResults, false, null);
@@ -125,7 +125,7 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
-            RealmResults<T> realmResults,
+            OrderedRealmCollection<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults,
             boolean addSectionHeaders,
@@ -142,7 +142,7 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
-            RealmResults<T> realmResults,
+            OrderedRealmCollection<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults,
             boolean addSectionHeaders,
@@ -164,31 +164,28 @@ public abstract class RealmBasedRecyclerViewAdapter
         // If automatic updates aren't enabled, then animateResults should be false as well.
         this.animateResults = (automaticUpdate && animateResults);
         if (animateResults) {
-            animatePrimaryColumnIndex = realmResults.getTable().getTable().getPrimaryKey();
+            TableOrView table = getTableOrView(realmResults);
+
+            animatePrimaryColumnIndex = table.getTable().getPrimaryKey();
             if (animatePrimaryColumnIndex == TableOrView.NO_MATCH) {
-                throw new IllegalStateException(
-                        "Animating the results requires a primaryKey.");
+                throw new IllegalStateException("Animating the results requires a primaryKey.");
             }
-            animatePrimaryIdType = realmResults.getTable().getColumnType(animatePrimaryColumnIndex);
-            if (animatePrimaryIdType != RealmFieldType.INTEGER &&
-                    animatePrimaryIdType != RealmFieldType.STRING) {
-                throw new IllegalStateException(
-                        "Animating requires a primary key of type Integer/Long or String");
+            animatePrimaryIdType = table.getColumnType(animatePrimaryColumnIndex);
+            if (animatePrimaryIdType != RealmFieldType.INTEGER && animatePrimaryIdType != RealmFieldType.STRING) {
+                throw new IllegalStateException("Animating requires a primary key of type Integer/Long or String");
             }
 
             if (animateExtraColumnName != null) {
-                animateExtraColumnIndex = realmResults.getTable().getTable()
-                        .getColumnIndex(animateExtraColumnName);
+                animateExtraColumnIndex = table.getTable().getColumnIndex(animateExtraColumnName);
                 if (animateExtraColumnIndex == TableOrView.NO_MATCH) {
-                    throw new IllegalStateException(
-                            "Animating the results requires a valid animateColumnName.");
+                    throw new IllegalStateException("Animating the results requires a valid animateColumnName.");
                 }
-                animateExtraIdType = realmResults.getTable().getColumnType(animateExtraColumnIndex);
-                if (animateExtraIdType != RealmFieldType.INTEGER &&
+
+                animateExtraIdType = table.getColumnType(animateExtraColumnIndex);
+                if (animateExtraIdType != RealmFieldType.INTEGER && 
                         animateExtraIdType != RealmFieldType.STRING &&
                         animateExtraIdType != RealmFieldType.DATE) {
-                    throw new IllegalStateException(
-                            "Animating requires a animateColumnName of type Int/Long or String");
+                    throw new IllegalStateException("Animating requires a animateColumnName of type Int/Long or String");
                 }
             } else {
                 animateExtraColumnIndex = -1;
@@ -196,8 +193,7 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
 
         if (addSectionHeaders && headerColumnName == null) {
-            throw new IllegalStateException(
-                    "A headerColumnName is required for section headers");
+            throw new IllegalStateException("A headerColumnName is required for section headers");
         }
 
         updateRealmResults(realmResults);
@@ -340,20 +336,47 @@ public abstract class RealmBasedRecyclerViewAdapter
      *
      * @param queryResults the new RealmResults coming from the new query.
      */
-    public void updateRealmResults(RealmResults<T> queryResults) {
-        if (listener != null && realmResults != null) {
-            realmResults.removeChangeListener(listener);
-        }
+    public void updateRealmResults(OrderedRealmCollection<T> queryResults) {
+        removeListener();
 
         realmResults = queryResults;
-        if (listener != null && realmResults != null) {
-            realmResults.addChangeListener(listener);
-        }
+
+        addListener();
 
         updateRowWrappers();
         ids = getIdsOfRealmResults();
 
         notifyDataSetChanged();
+    }
+
+    private void addListener() {
+        if (listener != null && realmResults != null) {
+            if (realmResults instanceof RealmResults) {
+                RealmResults data = (RealmResults) realmResults;
+                data.addChangeListener(listener);
+            } else if (realmResults instanceof RealmList) {
+                RealmList data = (RealmList) realmResults;
+//                TODO: how to handle realm list?
+//                data.realm.handlerController.addChangeListenerAsWeakReference(listener);
+            } else {
+                throw new IllegalArgumentException("RealmCollection not supported: " + realmResults.getClass());
+            }
+        }
+    }
+
+    private void removeListener() {
+        if (listener != null && realmResults != null) {
+            if (realmResults instanceof RealmResults) {
+                RealmResults data = (RealmResults) realmResults;
+                data.removeChangeListener(listener);
+            } else if (realmResults instanceof RealmList) {
+                RealmList data = (RealmList) realmResults;
+//                TODO: how to handle realm list?
+//                data.realm.handlerController.removeWeakChangeListener(listener);
+            } else {
+                throw new IllegalArgumentException("RealmCollection not supported: " + realmResults.getClass());
+            }
+        }
     }
 
     /**
@@ -403,32 +426,46 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     private Object getRealmRowId(int realmIndex) {
         Object rowPrimaryId;
-        RealmObjectProxy proxy = (RealmObjectProxy) realmResults.get(realmIndex);
-        Row row = proxy.realmGet$proxyState().getRow$realm();
-
         if (animatePrimaryIdType == RealmFieldType.INTEGER) {
-            rowPrimaryId = row.getLong(animatePrimaryColumnIndex);
+            rowPrimaryId = getRow(realmIndex).getLong(animatePrimaryColumnIndex);
         } else if (animatePrimaryIdType == RealmFieldType.STRING) {
-            rowPrimaryId = row.getString(animatePrimaryColumnIndex);
+            rowPrimaryId = getRow(realmIndex).getString(animatePrimaryColumnIndex);
         } else {
             throw new IllegalStateException("Unknown animatedIdType");
         }
 
         if (animateExtraColumnIndex != -1) {
-            String rowPrimaryIdStr = (rowPrimaryId instanceof String)
-                    ? (String) rowPrimaryId : String.valueOf(rowPrimaryId);
+            Object value;
             if (animateExtraIdType == RealmFieldType.INTEGER) {
-                return rowPrimaryIdStr + String.valueOf(row.getLong(animateExtraColumnIndex));
+                value = getRow(realmIndex).getLong(animateExtraColumnIndex);
             } else if (animateExtraIdType == RealmFieldType.STRING) {
-                return rowPrimaryIdStr + row.getString(animateExtraColumnIndex);
+                value = getRow(realmIndex).getString(animateExtraColumnIndex);
             } else if (animateExtraIdType == RealmFieldType.DATE) {
-                return rowPrimaryIdStr + row.getDate(animateExtraColumnIndex).getTime();
+                value = getRow(realmIndex).getDate(animateExtraColumnIndex).getTime();
             } else {
                 throw new IllegalStateException("Unknown animateExtraIdType");
             }
+
+            return String.valueOf(rowPrimaryId) + String.valueOf(value);
         } else {
             return rowPrimaryId;
         }
+    }
+
+    private Row getRow(int realmIndex) {
+        T realmObject = getRealmObjectAtIndex(realmIndex);
+
+        return getRow(realmObject);
+    }
+
+    private Row getRow(RealmModel realmObject) {
+        RealmObjectProxy proxy = (RealmObjectProxy) realmObject;
+
+        return proxy.realmGet$proxyState().getRow$realm();
+    }
+
+    private T getRealmObjectAtIndex(int realmIndex) {
+        return realmResults.get(realmIndex);
     }
 
     private void updateRowWrappers() {
@@ -441,23 +478,19 @@ public abstract class RealmBasedRecyclerViewAdapter
             int sectionFirstPosition = 0;
             rowWrappers.clear();
 
-            final long headerIndex = realmResults.getTable().getColumnIndex(headerColumnName);
+            long headerIndex = getTableOrView().getColumnIndex(headerColumnName);
             int i = 0;
             for (RealmModel result : realmResults) {
                 Object rawHeader;
-                RealmFieldType fieldType = ((RealmObjectProxy) result)
-                        .realmGet$proxyState().getRow$realm().getColumnType(headerIndex);
+                Row row = getRow(result);
+                RealmFieldType fieldType = row.getColumnType(headerIndex);
 
                 if (fieldType == RealmFieldType.STRING) {
-                    rawHeader = ((RealmObjectProxy) result)
-                            .realmGet$proxyState().getRow$realm().getString(headerIndex);
-
+                    rawHeader = row.getString(headerIndex);
                 } else if (fieldType == RealmFieldType.BOOLEAN) {
-                    rawHeader = ((RealmObjectProxy) result)
-                            .realmGet$proxyState().getRow$realm().getBoolean(headerIndex);
+                    rawHeader = row.getBoolean(headerIndex);
                 } else if (fieldType == RealmFieldType.INTEGER) {
-                    rawHeader = ((RealmObjectProxy) result)
-                            .realmGet$proxyState().getRow$realm().getLong(headerIndex);
+                    rawHeader = row.getLong(headerIndex);
                 } else {
                     throw new IllegalStateException("columnValue type not supported");
                 }
@@ -476,10 +509,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
     }
 
-    private RealmChangeListener<RealmResults<T>> getRealmChangeListener() {
-        return new RealmChangeListener<RealmResults<T>>() {
+    private RealmChangeListener<OrderedRealmCollection <T>> getRealmChangeListener() {
+        return new RealmChangeListener<OrderedRealmCollection <T>>() {
             @Override
-            public void onChange(RealmResults<T> element) {
+            public void onChange(OrderedRealmCollection <T> element) {
                 if (animateResults && ids != null && !ids.isEmpty()) {
                     updateRowWrappers();
                     List newIds = getIdsOfRealmResults();
@@ -493,6 +526,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                     List    <Delta> deltas = patch.getDeltas();
                     ids = newIds;
                     if (deltas.isEmpty()) {
+
                         // Nothing has changed - most likely because the notification was for
                         // a different object/table
                     } else if (addSectionHeaders) {
@@ -611,9 +645,33 @@ public abstract class RealmBasedRecyclerViewAdapter
      * If it is extended to LinearLayoutWithHeaders, rowWrappers will have to be used.
      */
     public void onItemSwipedDismiss(int position) {
-        final BaseRealm realm = realmResults.realm;
+        final BaseRealm realm = getRealm();
         realm.beginTransaction();
-        realmResults.deleteFromRealm(position);
+        RealmObject.deleteFromRealm(realmResults.get(position));
         realm.commitTransaction();
+    }
+
+    private TableOrView getTableOrView() {
+        return getTableOrView(realmResults);
+    }
+
+    private TableOrView getTableOrView(OrderedRealmCollection<T> results) {
+        if (results instanceof RealmList) {
+            return ((RealmList)results).view.getTable();
+        } else if (results instanceof RealmResults) {
+            return ((RealmResults)results).getTable();
+        }
+
+        throw new IllegalStateException("Unknown OrderedRealmCollection type: " + realmResults);
+    }
+
+    private BaseRealm getRealm() {
+        if (realmResults instanceof RealmList) {
+            return ((RealmList)realmResults).realm;
+        } else if (realmResults instanceof RealmResults) {
+            return ((RealmResults)realmResults).realm;
+        }
+
+        throw new IllegalStateException("Unknown OrderedRealmCollection type: " + realmResults);
     }
 }
