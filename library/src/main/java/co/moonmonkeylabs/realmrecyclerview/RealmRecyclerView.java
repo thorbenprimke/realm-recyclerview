@@ -184,6 +184,11 @@ public class RealmRecyclerView extends FrameLayout {
         }
     }
 
+    public void setEmptyViewId(int emptyViewId) {
+        this.emptyViewId = emptyViewId;
+        this.emptyContentContainer.setLayoutResource(emptyViewId);
+    }
+
     public void enableRefresh() {
         isRefreshable = true;
         swipeRefreshLayout.setEnabled(true);
@@ -375,8 +380,8 @@ public class RealmRecyclerView extends FrameLayout {
         if (emptyViewId == 0) {
             return;
         }
-        emptyContentContainer.setVisibility(
-                adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+        boolean noResults = adapter.getItemCount() == 0;
+        emptyContentContainer.setVisibility(noResults ? View.VISIBLE : View.GONE);
     }
 
     //
