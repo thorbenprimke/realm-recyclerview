@@ -54,7 +54,7 @@ public class RealmRecyclerView extends FrameLayout {
     private boolean swipeToDelete;
     private int bufferItems = 3;
 
-    private GridLayoutManager gridManager;
+    private LinearLayoutManager layoutManager;
     private int lastMeasuredWidth = -1;
 
     // State
@@ -91,9 +91,10 @@ public class RealmRecyclerView extends FrameLayout {
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
-        if (gridWidthPx != -1 && gridManager != null && lastMeasuredWidth != getMeasuredWidth()) {
+        boolean grid = layoutManager instanceof GridLayoutManager;
+        if (gridWidthPx != -1 && grid && lastMeasuredWidth != getMeasuredWidth()) {
             int spanCount = Math.max(1, getMeasuredWidth() / gridWidthPx);
-            gridManager.setSpanCount(spanCount);
+            ((GridLayoutManager)layoutManager).setSpanCount(spanCount);
             lastMeasuredWidth = getMeasuredWidth();
         }
     }
@@ -122,7 +123,8 @@ public class RealmRecyclerView extends FrameLayout {
         }
         switch (type) {
             case LinearLayout:
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                layoutManager = new LinearLayoutManager(getContext());
+                recyclerView.setLayoutManager(layoutManager);
                 break;
 
             case Grid:
@@ -138,8 +140,8 @@ public class RealmRecyclerView extends FrameLayout {
                 // Uses either the provided gridSpanCount or 1 as a placeholder what will be
                 // calculated based on gridWidthPx in onMeasure.
                 int spanCount = gridSpanCount == -1 ? 1 : gridSpanCount;
-                gridManager = new GridLayoutManager(getContext(), spanCount);
-                recyclerView.setLayoutManager(gridManager);
+                layoutManager = new GridLayoutManager(getContext(), spanCount);
+                recyclerView.setLayoutManager(layoutManager);
                 break;
 
             case LinearLayoutWithHeaders:
@@ -215,10 +217,10 @@ public class RealmRecyclerView extends FrameLayout {
      * @param orientation {@link #HORIZONTAL} or {@link #VERTICAL}
      */
     public void setOrientation(int orientation) {
-        if(gridManager == null) {
+        if (layoutManager == null) {
             throw new IllegalStateException("Error init of GridLayoutManager");
         }
-        gridManager.setOrientation(orientation);
+        layoutManager.setOrientation(orientation);
     }
 
     private void throwIfSwipeToDeleteEnabled() {
