@@ -527,8 +527,10 @@ public abstract class RealmBasedRecyclerViewAdapter
                     ids = newIds;
                     if (deltas.isEmpty()) {
 
-                        // Nothing has changed - most likely because the notification was for
-                        // a different object/table
+                        // Ids haven't changed but items themselves may have
+
+                        notifyDataSetChanged();
+
                     } else if (addSectionHeaders) {
                         // If sectionHeaders are enabled, the animations have some special cases and
                         // the non-animated rows need to be updated as well.
