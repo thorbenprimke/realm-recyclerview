@@ -372,6 +372,10 @@ public class RealmRecyclerView extends FrameLayout {
         isRefreshing = refreshing;
         swipeRefreshLayout.setRefreshing(refreshing);
     }
+    
+    public void resetHasLoadMoreFired() {
+        hasLoadMoreFired = false;
+    }
 
     private SwipeRefreshLayout.OnRefreshListener recyclerViewRefreshListener =
             new SwipeRefreshLayout.OnRefreshListener() {
