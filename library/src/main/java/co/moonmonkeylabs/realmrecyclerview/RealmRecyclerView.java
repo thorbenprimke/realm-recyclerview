@@ -79,7 +79,7 @@ public class RealmRecyclerView extends FrameLayout {
         init(context, attrs);
     }
     
-        public RealmRecyclerView(Context context, AttributeSet attrs, int defStyleAttr, int bufferItems) {
+    public RealmRecyclerView(Context context, AttributeSet attrs, int defStyleAttr, int bufferItems) {
         super(context, attrs, defStyleAttr);
         if (bufferItems <= 0) bufferItems = 0;
         this.bufferItems = bufferItems;
