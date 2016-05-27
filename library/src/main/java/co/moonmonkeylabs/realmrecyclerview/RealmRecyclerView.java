@@ -52,6 +52,7 @@ public class RealmRecyclerView extends FrameLayout {
     private int gridSpanCount;
     private int gridWidthPx;
     private boolean swipeToDelete;
+    private int bufferItems = 3;
 
     private GridLayoutManager gridManager;
     private int lastMeasuredWidth = -1;
@@ -75,6 +76,13 @@ public class RealmRecyclerView extends FrameLayout {
 
     public RealmRecyclerView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context, attrs);
+    }
+    
+    public RealmRecyclerView(Context context, AttributeSet attrs, int defStyleAttr, int bufferItems) {
+        super(context, attrs, defStyleAttr);
+        if (bufferItems <= 0) bufferItems = 0;
+        this.bufferItems = bufferItems;
         init(context, attrs);
     }
 
@@ -223,7 +231,7 @@ public class RealmRecyclerView extends FrameLayout {
             return;
         }
 
-        if (firstVisibleItemPosition + visibleItemCount + 3 > totalItemCount) {
+        if (firstVisibleItemPosition + visibleItemCount + bufferItems > totalItemCount) {
             if (onLoadMoreListener != null) {
                 hasLoadMoreFired = true;
                 onLoadMoreListener.onLoadMore(adapter.getLastItem());
@@ -371,6 +379,10 @@ public class RealmRecyclerView extends FrameLayout {
         }
         isRefreshing = refreshing;
         swipeRefreshLayout.setRefreshing(refreshing);
+    }
+    
+    public void resetHasLoadMoreFired() {
+        hasLoadMoreFired = false;
     }
 
     private SwipeRefreshLayout.OnRefreshListener recyclerViewRefreshListener =
