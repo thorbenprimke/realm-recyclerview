@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,12 +19,11 @@ import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import co.moonmonkeylabs.realmrecyclerview.example.models.QuoteModel;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
 import io.realm.Sort;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RealmBaseActivity {
 
     private static List<String> quotes = Arrays.asList(
             "Always borrow money from a pessimist. He won’t expect it back.",
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         setTitle(getResources().getString(R.string.activity_layout_name, type));
 
         resetRealm();
-        realm = Realm.getInstance(this);
+        realm = Realm.getInstance(getRealmConfig());
 
         boolean isBulk = type.equals("LinearBulk");
 
@@ -238,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 instance.beginTransaction();
                 QuoteModel quoteModel = instance.createObject(QuoteModel.class);
                 quoteModel.setId(System.currentTimeMillis());
@@ -255,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 QuoteModel cached = instance.where(QuoteModel.class).equalTo("id", 1).findFirst();
                 if (cached != null) {
                     instance.close();
@@ -292,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 QuoteModel cached = instance.where(QuoteModel.class).equalTo("id", 2).findFirst();
                 if (cached != null) {
                     instance.close();
@@ -320,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 QuoteModel quoteModel =
                         instance.where(QuoteModel.class).equalTo("id", id).findFirst();
                 if (quoteModel != null) {
@@ -339,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 QuoteModel quoteModel =
                         instance.where(QuoteModel.class).equalTo("id", id).findFirst();
                 if (quoteModel != null) {
@@ -363,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                 }
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 final RealmResults<QuoteModel> all = instance.where(QuoteModel.class).findAll();
                 if (all != null) {
                     instance.beginTransaction();
@@ -392,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                 }
-                Realm instance = Realm.getInstance(MainActivity.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 instance.beginTransaction();
                 for (int i = 0; i < 60; i++) {
                     QuoteModel quoteModel = instance.createObject(QuoteModel.class);
@@ -411,13 +409,5 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         remoteItem.execute();
-    }
-
-    private void resetRealm() {
-        RealmConfiguration realmConfig = new RealmConfiguration
-                .Builder(this)
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm.deleteRealm(realmConfig);
     }
 }

@@ -3,7 +3,6 @@ package co.moonmonkeylabs.realmrecyclerview.example;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,12 +14,11 @@ import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import co.moonmonkeylabs.realmrecyclerview.example.models.CountryModel;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
 import io.realm.Sort;
 
-public class MainActivity2 extends AppCompatActivity {
+public class MainActivity2 extends RealmBaseActivity {
 
     private RealmRecyclerView realmRecyclerView;
     private CountryRecyclerViewAdapter countryAdapter;
@@ -36,7 +34,7 @@ public class MainActivity2 extends AppCompatActivity {
         setTitle(getResources().getString(R.string.activity_layout_name, type));
 
         resetRealm();
-        realm = Realm.getInstance(this);
+        realm = Realm.getInstance(getRealmConfig());
 
         realmRecyclerView = (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
 
@@ -121,24 +119,16 @@ public class MainActivity2 extends AppCompatActivity {
         }
     }
 
-    private void resetRealm() {
-        RealmConfiguration realmConfig = new RealmConfiguration
-                .Builder(this)
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm.deleteRealm(realmConfig);
-    }
-
     private void asyncRemoveCountry(final long id) {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity2.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 CountryModel countryModel =
                         instance.where(CountryModel.class).equalTo("id", id).findFirst();
                 if (countryModel != null) {
                     instance.beginTransaction();
-                    countryModel.removeFromRealm();
+                    countryModel.deleteFromRealm();
                     instance.commitTransaction();
                 }
                 instance.close();
@@ -152,7 +142,7 @@ public class MainActivity2 extends AppCompatActivity {
         AsyncTask<Void, Void, Void> remoteItem = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Realm instance = Realm.getInstance(MainActivity2.this);
+                Realm instance = Realm.getInstance(getRealmConfig());
                 instance.beginTransaction();
                 CountryModel countryModel =
                         instance.where(CountryModel.class).equalTo("name", name).findFirst();

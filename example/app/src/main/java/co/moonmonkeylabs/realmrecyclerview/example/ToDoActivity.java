@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import co.moonmonkeylabs.realmrecyclerview.example.models.TodoItem;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
-import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
 import io.realm.Sort;
@@ -30,7 +28,7 @@ import io.realm.Sort;
 /**
  * A TO-DO app example showcasing the {@link RealmRecyclerView} with swipe to delete.
  */
-public class ToDoActivity extends AppCompatActivity {
+public class ToDoActivity extends RealmBaseActivity {
 
     private static final int[] COLORS = new int[] {
             Color.argb(255, 28, 160, 170),
@@ -61,7 +59,7 @@ public class ToDoActivity extends AppCompatActivity {
         });
 
         resetRealm();
-        realm = Realm.getInstance(this);
+        realm = Realm.getInstance(getRealmConfig());
         RealmResults<TodoItem> toDoItems = realm
                 .where(TodoItem.class)
                 .findAllSorted("id", Sort.ASCENDING);
@@ -170,13 +168,5 @@ public class ToDoActivity extends AppCompatActivity {
                     COLORS[(int) (toDoItem.getId() % COLORS.length)]
             );
         }
-    }
-
-    private void resetRealm() {
-        RealmConfiguration realmConfig = new RealmConfiguration
-                .Builder(this)
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm.deleteRealm(realmConfig);
     }
 }
