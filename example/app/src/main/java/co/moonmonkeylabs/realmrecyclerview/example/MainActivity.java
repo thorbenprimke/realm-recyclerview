@@ -185,8 +185,7 @@ public class MainActivity extends RealmBaseActivity {
         @Override
         public ViewHolder onCreateRealmViewHolder(ViewGroup viewGroup, int viewType) {
             View v = inflater.inflate(R.layout.item_view, viewGroup, false);
-            ViewHolder vh = new ViewHolder((FrameLayout) v);
-            return vh;
+            return new ViewHolder((FrameLayout) v);
         }
 
         @Override
@@ -227,8 +226,7 @@ public class MainActivity extends RealmBaseActivity {
         @Override
         public ViewHolder onCreateFooterViewHolder(ViewGroup viewGroup) {
             View v = inflater.inflate(R.layout.footer_view, viewGroup, false);
-            ViewHolder vh = new ViewHolder((FrameLayout) v);
-            return vh;
+            return new ViewHolder((FrameLayout) v);
         }
     }
 
@@ -359,7 +357,7 @@ public class MainActivity extends RealmBaseActivity {
                 // Add some delay to the refresh/remove action.
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
                 Realm instance = Realm.getInstance(getRealmConfig());
                 instance.beginTransaction();
@@ -385,7 +383,7 @@ public class MainActivity extends RealmBaseActivity {
                 // Add some delay to the refresh/remove action.
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException e) {
+                } catch (InterruptedException ignored) {
                 }
                 Realm instance = Realm.getInstance(getRealmConfig());
                 instance.beginTransaction();

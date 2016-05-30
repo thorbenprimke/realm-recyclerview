@@ -99,8 +99,7 @@ public class GridExampleActivity extends AppCompatActivity {
         @Override
         public ViewHolder onCreateRealmViewHolder(ViewGroup viewGroup, int viewType) {
             View v = inflater.inflate(R.layout.grid_item_view, viewGroup, false);
-            ViewHolder vh = new ViewHolder((LinearLayout) v);
-            return vh;
+            return new ViewHolder((LinearLayout) v);
         }
 
         @Override
