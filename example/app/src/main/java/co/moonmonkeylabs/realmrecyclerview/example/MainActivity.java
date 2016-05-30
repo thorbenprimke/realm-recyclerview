@@ -362,12 +362,9 @@ public class MainActivity extends RealmBaseActivity {
                 } catch (InterruptedException e) {
                 }
                 Realm instance = Realm.getInstance(getRealmConfig());
-                final RealmResults<QuoteModel> all = instance.where(QuoteModel.class).findAll();
-                if (all != null) {
-                    instance.beginTransaction();
-                    all.clear();
-                    instance.commitTransaction();
-                }
+                instance.beginTransaction();
+                instance.delete(QuoteModel.class);
+                instance.commitTransaction();
                 instance.close();
                 return null;
             }
