@@ -88,7 +88,7 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     private List<RowWrapper> rowWrappers;
 
-    private RealmChangeListener listener;
+    private RealmChangeListener<RealmResults<T>> listener;
     private boolean animateResults;
     private boolean addSectionHeaders;
     private String headerColumnName;
@@ -334,14 +334,12 @@ public abstract class RealmBasedRecyclerViewAdapter
      * @param queryResults the new RealmResults coming from the new query.
      */
     public void updateRealmResults(RealmResults<T> queryResults) {
-        if (listener != null) {
-            if (realmResults != null) {
-                realmResults.removeChangeListener(listener);
-            }
+        if (listener != null && realmResults != null) {
+            realmResults.removeChangeListener(listener);
         }
 
         realmResults = queryResults;
-        if (realmResults != null) {
+        if (listener != null && realmResults != null) {
             realmResults.addChangeListener(listener);
         }
 
@@ -441,10 +439,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
     }
 
-    private RealmChangeListener getRealmChangeListener() {
-        return new RealmChangeListener() {
+    private RealmChangeListener<RealmResults<T>> getRealmChangeListener() {
+        return new RealmChangeListener<RealmResults<T>>() {
             @Override
-            public void onChange(Object element) {
+            public void onChange(RealmResults<T> element) {
                 if (animateResults && ids != null && !ids.isEmpty()) {
                     updateRowWrappers();
                     List newIds = getIdsOfRealmResults();
