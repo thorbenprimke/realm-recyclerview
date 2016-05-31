@@ -47,7 +47,7 @@ import io.realm.internal.TableOrView;
  * {@link RealmRecyclerView}.
  */
 public abstract class RealmBasedRecyclerViewAdapter
-        <T extends RealmObject, VH extends RealmViewHolder>
+        <T extends RealmModel, VH extends RealmViewHolder>
         extends RecyclerView.Adapter<RealmViewHolder> {
 
     public class RowWrapper {
@@ -422,7 +422,7 @@ public abstract class RealmBasedRecyclerViewAdapter
 
             final long headerIndex = realmResults.getTable().getColumnIndex(headerColumnName);
             int i = 0;
-            for (RealmObject result : realmResults) {
+            for (RealmModel result : realmResults) {
                 String rawHeader = ((RealmObjectProxy) result)
                         .realmGet$proxyState().getRow$realm().getString(headerIndex);
                 String header = createHeaderFromColumnValue(rawHeader);
@@ -576,8 +576,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     public void onItemSwipedDismiss(int position) {
         final BaseRealm realm = realmResults.realm;
         realm.beginTransaction();
-        realmResults.get(position).deleteFromRealm();
+        realmResults.deleteFromRealm(position);
         realm.commitTransaction();
     }
 }
-
