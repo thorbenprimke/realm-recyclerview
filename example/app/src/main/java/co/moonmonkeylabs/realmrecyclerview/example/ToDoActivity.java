@@ -156,8 +156,7 @@ public class ToDoActivity extends RealmBaseActivity {
         @Override
         public ViewHolder onCreateRealmViewHolder(ViewGroup viewGroup, int viewType) {
             View v = inflater.inflate(R.layout.to_do_item_view, viewGroup, false);
-            ViewHolder vh = new ViewHolder((FrameLayout) v);
-            return vh;
+            return new ViewHolder((FrameLayout) v);
         }
 
         @Override
