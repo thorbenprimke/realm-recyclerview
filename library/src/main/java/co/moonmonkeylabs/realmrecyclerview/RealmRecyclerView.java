@@ -364,6 +364,13 @@ public class RealmRecyclerView extends FrameLayout {
     public void scrollToPosition(int position) {
         recyclerView.scrollToPosition(position);
     }
+    
+    //
+    // Expose public RecycleView
+    
+    public RecyclerView getRecycleView(){
+        return recyclerView;
+    }
 
     //
     // Pull-to-refresh
@@ -383,6 +390,12 @@ public class RealmRecyclerView extends FrameLayout {
     
     public void resetHasLoadMoreFired() {
         hasLoadMoreFired = false;
+    }
+
+    // Expose method to change the preloaded items
+    public void setBufferItems(int bufferItems){
+        if (bufferItems <= 0) bufferItems = 0;
+        this.bufferItems = bufferItems;
     }
 
     private SwipeRefreshLayout.OnRefreshListener recyclerViewRefreshListener =
