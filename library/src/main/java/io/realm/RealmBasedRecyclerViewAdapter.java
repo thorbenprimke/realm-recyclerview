@@ -82,6 +82,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     private final int LOAD_MORE_VIEW_TYPE = 101;
     private final int FOOTER_VIEW_TYPE = 102;
 
+    private Context context;
     protected LayoutInflater inflater;
     protected RealmResults<T> realmResults;
     protected List ids;
@@ -151,6 +152,7 @@ public abstract class RealmBasedRecyclerViewAdapter
             throw new IllegalArgumentException("Context cannot be null");
         }
 
+        this.context = context;
         this.animateResults = animateResults;
         this.addSectionHeaders = addSectionHeaders;
         this.headerColumnName = headerColumnName;
@@ -228,6 +230,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         } else {
             layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
+    }
+
+    public Context getContext() {
+        return context;
     }
 
     /**
