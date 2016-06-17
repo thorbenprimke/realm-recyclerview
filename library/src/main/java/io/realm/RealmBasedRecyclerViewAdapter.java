@@ -359,8 +359,22 @@ public abstract class RealmBasedRecyclerViewAdapter
      * Method that creates the header string that should be used. Override this method to have
      * a custom header.
      */
-    public String createHeaderFromColumnValue(String columnValue) {
-        return columnValue.substring(0, 1);
+    public String createHeaderFromColumnValue(Object columnValue) {
+        String result = null;
+        if (columnValue instanceof Boolean) {
+            result = columnValue.toString();
+        }
+
+        if (columnValue instanceof String) {
+            result = ((String) columnValue).substring(0, 1);
+        }
+
+        if (columnValue instanceof Long) {
+            result = columnValue.toString();
+        }
+
+        return result;
+
     }
 
     private List getIdsOfRealmResults() {
@@ -429,8 +443,26 @@ public abstract class RealmBasedRecyclerViewAdapter
             final long headerIndex = realmResults.getTable().getColumnIndex(headerColumnName);
             int i = 0;
             for (RealmModel result : realmResults) {
-                String rawHeader = ((RealmObjectProxy) result)
-                        .realmGet$proxyState().getRow$realm().getString(headerIndex);
+                Object rawHeader = null;
+                RealmFieldType fieldType = ((RealmObjectProxy) result)
+                        .realmGet$proxyState().getRow$realm().getColumnType(headerIndex);
+
+                if (fieldType == RealmFieldType.STRING) {
+                    rawHeader = ((RealmObjectProxy) result)
+                            .realmGet$proxyState().getRow$realm().getString(headerIndex);
+
+                }
+
+                if (fieldType == RealmFieldType.BOOLEAN) {
+                    rawHeader = ((RealmObjectProxy) result)
+                            .realmGet$proxyState().getRow$realm().getBoolean(headerIndex);
+                }
+
+                if (fieldType == RealmFieldType.INTEGER) {
+                    rawHeader = ((RealmObjectProxy) result)
+                            .realmGet$proxyState().getRow$realm().getLong(headerIndex);
+                }
+
                 String header = createHeaderFromColumnValue(rawHeader);
                 if (!TextUtils.equals(lastHeader, header)) {
                     // Insert new header view and update section data.
