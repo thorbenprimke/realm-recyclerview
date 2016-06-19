@@ -90,6 +90,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     private List<RowWrapper> rowWrappers;
 
     private RealmChangeListener<OrderedRealmCollection<T>> listener;
+    private boolean automaticUpdate;
     private boolean animateResults;
     private boolean addSectionHeaders;
     private String headerColumnName;
@@ -157,6 +158,8 @@ public abstract class RealmBasedRecyclerViewAdapter
         this.addSectionHeaders = addSectionHeaders;
         this.headerColumnName = headerColumnName;
         this.inflater = LayoutInflater.from(context);
+        this.automaticUpdate = automaticUpdate;
+
         this.listener = (!automaticUpdate) ? null : getRealmChangeListener();
 
         rowWrappers = new ArrayList<>();
@@ -338,6 +341,7 @@ public abstract class RealmBasedRecyclerViewAdapter
      */
     public void updateRealmResults(OrderedRealmCollection<T> queryResults) {
         removeListener();
+        this.realmResults = queryResults;
 
         realmResults = queryResults;
 
@@ -347,6 +351,26 @@ public abstract class RealmBasedRecyclerViewAdapter
         ids = getIdsOfRealmResults();
 
         notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        if (automaticUpdate && isDataValid()) {
+            addListener();
+        }
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(final RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+        if (automaticUpdate && isDataValid()) {
+            removeListener();
+        }
+    }
+
+    private boolean isDataValid() {
+        return realmResults != null && realmResults.isValid();
     }
 
     private void addListener() {
@@ -509,10 +533,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
     }
 
-    private RealmChangeListener<OrderedRealmCollection <T>> getRealmChangeListener() {
-        return new RealmChangeListener<OrderedRealmCollection <T>>() {
+    private RealmChangeListener<OrderedRealmCollection<T>> getRealmChangeListener() {
+        return new RealmChangeListener<OrderedRealmCollection<T>>() {
             @Override
-            public void onChange(OrderedRealmCollection <T> element) {
+            public void onChange(OrderedRealmCollection<T> element) {
                 if (animateResults && ids != null && !ids.isEmpty()) {
                     updateRowWrappers();
                     List newIds = getIdsOfRealmResults();
