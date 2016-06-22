@@ -1,5 +1,23 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'realm-android'
+
+repositories {
+    mavenLocal()
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4'
+        classpath 'io.realm:realm-gradle-plugin:1.0.1'
+    }
+}
 
 android {
     compileSdkVersion 24
@@ -19,18 +37,25 @@ android {
     }
 }
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'io.realm:realm-gradle-plugin:1.0.0'
-    }
-}
-
 dependencies {
     compile 'com.android.support:design:24.0.0'
     compile 'com.android.support:recyclerview-v7:24.0.0'
     compile 'com.googlecode.java-diff-utils:diffutils:1.3.0'
     compile 'com.tonicartos:superslim:0.4.13'
+}
+
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'realm-recyclerview'
+                // description ''
+                // url 'http://realm.io'
+                pom.groupId = 'com.github.thorbenprimke'
+                pom.artifactId = 'realm-recyclerview'
+                pom.version = '0.9-agrimap'
+            }
+        }
+    }
 }
