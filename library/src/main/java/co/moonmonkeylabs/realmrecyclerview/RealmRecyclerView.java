@@ -107,8 +107,13 @@ public class RealmRecyclerView extends FrameLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        inflate(context, R.layout.realm_recycler_view, this);
         initAttrs(context, attrs);
+        // the layout was hardcoded for vertical orientation: easy way out? create a duplicate but horizontal
+        if (orientation == Orientation.Horizontal) {
+            inflate(context, R.layout.realm_recycler_view_horizontal, this);
+        } else {
+            inflate(context, R.layout.realm_recycler_view, this);
+        }
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.rrv_swipe_refresh_layout);
         recyclerView = (RecyclerView) findViewById(R.id.rrv_recycler_view);
