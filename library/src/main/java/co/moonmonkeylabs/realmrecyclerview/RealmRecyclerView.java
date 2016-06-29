@@ -278,13 +278,11 @@ public class RealmRecyclerView extends FrameLayout {
                 .getDimensionPixelSize(R.styleable.RealmRecyclerView_rrvGridLayoutItemWidth, -1);
         swipeToDelete =
                 typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
-        typedArray.recycle();
-
         int orientationValue = typedArray.getInt(R.styleable.RealmRecyclerView_rrvOrientation, -1);
         if (orientationValue != -1) {
             orientation = Orientation.values()[typeValue];
         }
-
+        typedArray.recycle();
     }
 
     public void addItemDecoration(RecyclerView.ItemDecoration decor) {
