@@ -8,6 +8,10 @@
             <enum name="Grid" value="1"/>
             <enum name="LinearLayoutWithHeaders" value="2"/>
         </attr>
+        <attr name="rrvOrientation">
+            <enum name="Vertical" value="0"/>
+            <enum name="Horizontal" value="1"/>
+        </attr>
         <attr name="rrvGridLayoutSpanCount" format="integer"/>
         <attr name="rrvGridLayoutItemWidth" format="dimension"/>
         <attr name="rrvHeaderColumnName" format="string"/>

@@ -36,6 +36,10 @@ public class RealmRecyclerView extends FrameLayout {
         Grid,
         LinearLayoutWithHeaders
     }
+    private enum Orientation {
+        Vertical,
+        Horizontal
+    }
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
@@ -53,6 +57,12 @@ public class RealmRecyclerView extends FrameLayout {
     private int gridWidthPx;
     private boolean swipeToDelete;
     private int bufferItems = 3;
+    private Orientation orientation;
+    private int getOrientationValue() {
+        return orientation == Orientation.Horizontal
+                ? LinearLayoutManager.HORIZONTAL
+                : LinearLayoutManager.VERTICAL;
+    }
 
     private GridLayoutManager gridManager;
     private int lastMeasuredWidth = -1;
@@ -119,7 +129,8 @@ public class RealmRecyclerView extends FrameLayout {
         }
         switch (type) {
             case LinearLayout:
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),
+                        getOrientationValue(), false));
                 break;
 
             case Grid:
@@ -179,12 +190,6 @@ public class RealmRecyclerView extends FrameLayout {
         }
     }
 
-    /**
-     * Sets the orientation of the layout. {@link android.support.v7.widget.LinearLayoutManager}
-     * will do its best to keep scroll position.
-     *
-     * @param orientation {@link #HORIZONTAL} or {@link #VERTICAL}
-     */
     public void setOrientation(int orientation) {
         if(gridManager == null) {
             throw new IllegalStateException("Error init of GridLayoutManager");
@@ -274,6 +279,12 @@ public class RealmRecyclerView extends FrameLayout {
         swipeToDelete =
                 typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
         typedArray.recycle();
+
+        int orientationValue = typedArray.getInt(R.styleable.RealmRecyclerView_rrvOrientation, -1);
+        if (orientationValue != -1) {
+            orientation = Orientation.values()[typeValue];
+        }
+
     }
 
     public void addItemDecoration(RecyclerView.ItemDecoration decor) {
