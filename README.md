@@ -7,7 +7,8 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 * Pull-to-refresh (backed by SwipeRefreshLayout)
 * Infinite scrolling (callback for more data fetching)
 * Section headers (backed by SuperSLiM)
-
+* Optional horizontal orientation (currently only for linear layouts)
+                                                                                 
 ##How To Include It:
 
 ```
@@ -19,7 +20,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 ```
 	dependencies {
-	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.20'
+	        compile 'com.github.loudenvier:realm-recyclerview:0.9.22'
 	}
 ```
 
@@ -54,7 +55,7 @@ Important to note here is that the ```app:rrvLayoutType``` attribute has to be s
 
 All these will yield vertical linear or grid layouts.
 
-The snippet below shows how to include the create a horizontally oriented version of the above recycler view.
+The snippet below shows how to create a horizontally oriented version of the above recycler view.
 
 ```
     <co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView
