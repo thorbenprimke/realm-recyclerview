@@ -285,7 +285,7 @@ public class RealmRecyclerView extends FrameLayout {
                 typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
         int orientationValue = typedArray.getInt(R.styleable.RealmRecyclerView_rrvOrientation, -1);
         if (orientationValue != -1) {
-            orientation = Orientation.values()[typeValue];
+            orientation = Orientation.values()[orientationValue];
         }
         typedArray.recycle();
     }
