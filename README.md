@@ -54,6 +54,22 @@ Important to note here is that the ```app:rrvLayoutType``` attribute has to be s
 
 All these will yield vertical linear or grid layouts.
 
+The snippet below shows how to include the create a horizontally oriented version of the above recycler view.
+
+```
+    <co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView
+        android:id="@+id/realm_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:rrvIsRefreshable="true"
+        app:rrvEmptyLayoutId="@layout/empty_view"
+        app:rrvLayoutType="LinearLayout"
+        app:rrvOrientation="Horizontal"
+        />
+```
+
+The ```app:rrvOrientation``` can be ommited and it defaults to ```Vertical```.
+
 ###Other Attributes:
 
 ```rrvIsRefreshable```: Adds the pull-to-refresh feature to the ```recyclerView```. In order to receive the refresh events, a listner has to be set via ```setOnRefreshListener``` and ```setRefreshing``` is used to control either turn the refersh animation on/off.
@@ -65,6 +81,8 @@ All these will yield vertical linear or grid layouts.
  ```rrvGridLayoutItemWidth```: This attribute has to be set with a size value that represents the width of a grid column when the ```rrvLayoutType``` is set to ```Grid``` unless ```rrvGridLayoutSpanCount``` is set.
 
 ```rrvSwipeToDelete```: This attribute is only supported with ```rrvLayoutType``` of ```LinearLayout```. If set to true, swiping a row to delete is enabled. The row is deleted from the ```Realm``` directly.
+
+```rrvOrientation```: This attribute is currenty only supported with ```rrvLayoutType``` of ```LinearLayout```. It sets the orientation of the recycler's view ```LayoutManager``` allowing for layouts with horizontal orientation.
 
 ##RealmBasedRecyclerViewAdapter: 
 
