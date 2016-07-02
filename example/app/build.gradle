@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'realm-android'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.3'
+    compileSdkVersion 24
+    buildToolsVersion '24'
 
     defaultConfig {
         applicationId "co.moonmonkeylabs.realmrecyclerview.example"
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
     }
@@ -31,13 +31,13 @@ android {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:support-v4:23.4.0'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:recyclerview-v7:23.4.0'
+    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:recyclerview-v7:24.0.0'
     compile 'com.github.bumptech.glide:glide:3.6.1'
     // The library reference
-//    compile project(':library')
-    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.20'
+    compile project(':library')
+//    compile 'com.github.thorbenprimke:realm-recyclerview:0.9.21'
     // The date project reference
 //    compile project(':data')
     compile 'com.github.thorbenprimke:realm-nytimes-data:0.9.6'

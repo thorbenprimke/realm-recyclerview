@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
@@ -87,7 +88,7 @@ public class MainActivity extends RealmBaseActivity {
                 quoteModels,
                 true,
                 true,
-                isBulk ? "quote" : null);
+                isBulk ? "date" : null);
         realmRecyclerView.setAdapter(quoteAdapter);
 
         realmRecyclerView.setOnRefreshListener(
@@ -341,6 +342,7 @@ public class MainActivity extends RealmBaseActivity {
                 if (quoteModel != null) {
                     instance.beginTransaction();
                     quoteModel.setQuote("Updated: " + quoteModel.getQuote());
+                    quoteModel.setDate(new Date(System.currentTimeMillis()));
                     instance.commitTransaction();
                 }
                 instance.close();

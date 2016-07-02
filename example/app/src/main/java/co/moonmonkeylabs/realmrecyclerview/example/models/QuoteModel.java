@@ -1,5 +1,7 @@
 package co.moonmonkeylabs.realmrecyclerview.example.models;
 
+import java.util.Date;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -11,8 +13,10 @@ public class QuoteModel extends RealmObject {
     @PrimaryKey
     private long id;
     private String quote;
+    private Date date;
 
     public QuoteModel() {
+        date = new Date();
     }
 
     public QuoteModel(long id, String quote) {
@@ -34,5 +38,13 @@ public class QuoteModel extends RealmObject {
 
     public void setQuote(String quote) {
         this.quote = quote;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }
