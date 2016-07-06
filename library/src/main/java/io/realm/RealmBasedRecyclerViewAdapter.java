@@ -363,14 +363,12 @@ public abstract class RealmBasedRecyclerViewAdapter
         String result = null;
         if (columnValue instanceof Boolean) {
             result = columnValue.toString();
-        }
-
-        if (columnValue instanceof String) {
+        } else if (columnValue instanceof String) {
             result = ((String) columnValue).substring(0, 1);
-        }
-
-        if (columnValue instanceof Long) {
+        } else if (columnValue instanceof Long) {
             result = columnValue.toString();
+        } else {
+            throw new IllegalStateException("columnType not supported");
         }
 
         return result;
@@ -443,7 +441,7 @@ public abstract class RealmBasedRecyclerViewAdapter
             final long headerIndex = realmResults.getTable().getColumnIndex(headerColumnName);
             int i = 0;
             for (RealmModel result : realmResults) {
-                Object rawHeader = null;
+                Object rawHeader;
                 RealmFieldType fieldType = ((RealmObjectProxy) result)
                         .realmGet$proxyState().getRow$realm().getColumnType(headerIndex);
 
@@ -451,16 +449,14 @@ public abstract class RealmBasedRecyclerViewAdapter
                     rawHeader = ((RealmObjectProxy) result)
                             .realmGet$proxyState().getRow$realm().getString(headerIndex);
 
-                }
-
-                if (fieldType == RealmFieldType.BOOLEAN) {
+                } else if (fieldType == RealmFieldType.BOOLEAN) {
                     rawHeader = ((RealmObjectProxy) result)
                             .realmGet$proxyState().getRow$realm().getBoolean(headerIndex);
-                }
-
-                if (fieldType == RealmFieldType.INTEGER) {
+                } else if (fieldType == RealmFieldType.INTEGER) {
                     rawHeader = ((RealmObjectProxy) result)
                             .realmGet$proxyState().getRow$realm().getLong(headerIndex);
+                } else {
+                    throw new IllegalStateException("columnValue type not supported");
                 }
 
                 String header = createHeaderFromColumnValue(rawHeader);
