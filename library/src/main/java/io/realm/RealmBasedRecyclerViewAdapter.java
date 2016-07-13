@@ -378,9 +378,9 @@ public abstract class RealmBasedRecyclerViewAdapter
             if (realmResults instanceof RealmResults) {
                 RealmResults data = (RealmResults) realmResults;
                 data.addChangeListener(listener);
-            } else if (realmResults instanceof RealmList) {
-                RealmList data = (RealmList) realmResults;
 //                TODO: how to handle realm list?
+//            } else if (realmResults instanceof RealmList) {
+//                RealmList data = (RealmList) realmResults;
 //                data.realm.handlerController.addChangeListenerAsWeakReference(listener);
             } else {
                 throw new IllegalArgumentException("RealmCollection not supported: " + realmResults.getClass());
@@ -393,9 +393,9 @@ public abstract class RealmBasedRecyclerViewAdapter
             if (realmResults instanceof RealmResults) {
                 RealmResults data = (RealmResults) realmResults;
                 data.removeChangeListener(listener);
-            } else if (realmResults instanceof RealmList) {
-                RealmList data = (RealmList) realmResults;
 //                TODO: how to handle realm list?
+//            } else if (realmResults instanceof RealmList) {
+//                RealmList data = (RealmList) realmResults;
 //                data.realm.handlerController.removeWeakChangeListener(listener);
             } else {
                 throw new IllegalArgumentException("RealmCollection not supported: " + realmResults.getClass());
@@ -420,7 +420,6 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
 
         return result;
-
     }
 
     private List getIdsOfRealmResults() {
