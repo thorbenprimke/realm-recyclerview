@@ -578,9 +578,9 @@ public abstract class RealmBasedRecyclerViewAdapter
         return new RealmChangeListener<OrderedRealmCollection<T>>() {
             @Override
             public void onChange(OrderedRealmCollection<T> element) {
-                if (animateResults && ids != null && !ids.isEmpty()) {
-                    updateRowWrappers();
+                updateRowWrappers();
 
+                if (animateResults && ids != null && !ids.isEmpty()) {
                     List newIds = getIdsOfRealmResults();
 
                     // If the list is now empty, just notify the recyclerView of the change.
