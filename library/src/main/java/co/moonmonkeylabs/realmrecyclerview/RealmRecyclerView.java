@@ -408,4 +408,17 @@ public class RealmRecyclerView extends FrameLayout {
                     isRefreshing = true;
                 }
             };
+
+    //Allows the empty view Id to be set dynamically.
+    public void setEmptyViewId(int viewId){
+        if(viewId != 0){
+            emptyViewId = viewId;
+            refreshEmptyViewId();
+        }
+    }
+
+    private void refreshEmptyViewId(){
+        emptyContentContainer.setLayoutResource(emptyViewId);
+        emptyContentContainer.inflate();
+    }
 }
