@@ -99,6 +99,12 @@ public class RealmRecyclerView extends FrameLayout {
         }
     }
 
+    public void setRecyclerMarginBottom(int value) {
+        if (recyclerView != null) {
+            ((MarginLayoutParams)recyclerView.getLayoutParams()).bottomMargin = value;
+        }
+    }
+
     private void init(Context context, AttributeSet attrs) {
         inflate(context, R.layout.realm_recycler_view, this);
         initAttrs(context, attrs);
@@ -309,6 +315,7 @@ public class RealmRecyclerView extends FrameLayout {
                 .getDimensionPixelSize(R.styleable.RealmRecyclerView_rrvGridLayoutItemWidth, -1);
         swipeToDelete =
                 typedArray.getBoolean(R.styleable.RealmRecyclerView_rrvSwipeToDelete, false);
+
         typedArray.recycle();
     }
 
