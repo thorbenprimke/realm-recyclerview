@@ -29,6 +29,8 @@ import com.tonicartos.superslim.GridSLM;
 import com.tonicartos.superslim.LinearSLM;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import co.moonmonkeylabs.realmrecyclerview.LoadMoreListItemView;
@@ -536,7 +538,19 @@ public abstract class RealmBasedRecyclerViewAdapter
                             notifyDataSetChanged();
                         }
                     } else {
-                        for (Delta delta : deltas) {
+                        ArrayList<Delta> sortedDeltas = new ArrayList<>(deltas);
+                        Collections.sort(sortedDeltas, new Comparator<Delta>() {
+                            @Override
+                            public int compare(Delta delta, Delta t1) {
+                                if (delta.getType() == t1.getType()) {
+                                    return 0;
+                                } else if (delta.getType() == Delta.TYPE.DELETE && t1.getType() == Delta.TYPE.INSERT) {
+                                    return -1;
+                                } else return 1;
+                            }
+                        });
+
+                        for (Delta delta : sortedDeltas) {
                             if (delta.getType() == Delta.TYPE.INSERT) {
                                 notifyItemRangeInserted(
                                         delta.getRevised().getPosition(),
