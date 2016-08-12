@@ -492,7 +492,19 @@ public abstract class RealmBasedRecyclerViewAdapter
                         return;
                     }
                     Patch patch = DiffUtils.diff(ids, newIds);
-                    List    <Delta> deltas = patch.getDeltas();
+                    List <Delta> rawDeltas = patch.getDeltas();
+                    ArrayList<Delta> deltas = new ArrayList<>(rawDeltas);
+                    // Delete deltas should be actioned first.
+                    Collections.sort(deltas, new Comparator<Delta>() {
+                        @Override
+                        public int compare(Delta delta, Delta t1) {
+                            if (delta.getType() == t1.getType()) {
+                                return 0;
+                            } else if (delta.getType() == Delta.TYPE.DELETE && t1.getType() == Delta.TYPE.INSERT) {
+                                return -1;
+                            } else return 1;
+                        }
+                    });
                     ids = newIds;
                     if (deltas.isEmpty()) {
                         // Nothing has changed - most likely because the notification was for
@@ -538,19 +550,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                             notifyDataSetChanged();
                         }
                     } else {
-                        ArrayList<Delta> sortedDeltas = new ArrayList<>(deltas);
-                        Collections.sort(sortedDeltas, new Comparator<Delta>() {
-                            @Override
-                            public int compare(Delta delta, Delta t1) {
-                                if (delta.getType() == t1.getType()) {
-                                    return 0;
-                                } else if (delta.getType() == Delta.TYPE.DELETE && t1.getType() == Delta.TYPE.INSERT) {
-                                    return -1;
-                                } else return 1;
-                            }
-                        });
-
-                        for (Delta delta : sortedDeltas) {
+                        for (Delta delta : deltas) {
                             if (delta.getType() == Delta.TYPE.INSERT) {
                                 notifyItemRangeInserted(
                                         delta.getRevised().getPosition(),
