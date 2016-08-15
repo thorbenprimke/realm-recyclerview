@@ -1,6 +1,6 @@
 # A RecyclerView that is powered by Realm
 
-A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datastore. It supports the following features out of the box:
+A powerful ```RecyclerView``` wrapper for working with ```Realm``` as your datastore. It supports the following features out of the box:
 
 * Custom adapter that automatically refreshes the list when the realm changes and animates the new items in.
 * Empty state
@@ -70,13 +70,15 @@ All these will yield vertical linear or grid layouts.
 
 ##RealmBasedRecyclerViewAdapter: 
 
-The heart of the ```RealmRecyclerView```'s functionality comes from this custom ```RecyclerView.Adapter```. It includes support for insertion/deletion animation whenever the ```Realm``` changes. It also inculde the logic to generate the headers for the list's contents if it's of type ```LinearLayoutWithHeaders```. 
+The heart of the ```RealmRecyclerView```'s functionality comes from this custom ```RecyclerView.Adapter```. It includes support for insertion/deletion animation and refreshing a row whenever the ```Realm``` changes. It also inculde the logic to generate the headers for the list's contents if it's of type ```LinearLayoutWithHeaders```. 
 
-* ```automaticUpdate```: If automaticUpdate is set, the ```RealmResults``` are automatially updated and the list is refershed with new results.
+* ```automaticUpdate```: If automaticUpdate is set, the ```RealmResults``` are automatically updated and the list is refreshed with new results.
 
-* ```animateResults```: If animateResults is set together with automaticUpdate, the automatic updates are animated. This is limited to a single deletion or insertion. If it's more than one item, it will simply refresh the list. The animation leverages the resuls primary key column in order as a unique identifier for each row. Therefore your ```Realm```'s schema needs to include a primary key column of type ```Integer``` or ```String```.
+* ```animateResults```: If animateResults is set together with automaticUpdate, the automatic updates are animated. This is limited to a single deletion or insertion. If it's more than one item, it will simply refresh the list. The animation leverages the results primary key column as a unique identifier for each row. Therefore your ```Realm```'s schema needs to include a primary key column of type ```Integer``` or ```String```.
 
-* ```addSectionHeaders```: When the ```rrvLayoutType``` is ```LinearLayoutWithHeaders```, addSectionHeaders needs be set in order for the adapter to generate the headers. The ```headerColumnName``` needs to be set as well in order to look up the header column programmatically your ```Realm```'s schema. *Note: There is currently no support for customizing the header and it is always inline|sticky.*
+* ```addSectionHeaders```: When the ```rrvLayoutType``` is ```LinearLayoutWithHeaders```, addSectionHeaders needs be set in order for the adapter to generate the headers. The ```headerColumnName``` needs to be set as well in order to look up the header column programmatically in your ```Realm```'s schema. *Note: There is currently no support for customizing the header and it is always inline|sticky.*
+
+* ```animateExtraColumnName```: When ```automaticUpdate``` and ```animateResults``` is set the primary key is used to detect changes. If the primary key does not change then **only** deletions and insertions will be updated in the list. Set animateExtraColumnName to be name of a column in your ```Realm```'s schema. The column must be of type ```Integer```, ```Date``` or ```String```. When a change to this column is detected then the matching row in the list will be refreshed. A timestamp that is incremented after any column is updated would work well as an animateExtraColumnName.
 
 ##Feedback/More Features:
 I would love to hear your feedback. Do you find the ```RealmRecyclerView``` useful? What functionality are you missing? Open a ```Github``` issue and let me know. Thanks!
