@@ -355,7 +355,9 @@ public abstract class RealmBasedRecyclerViewAdapter
         updateRowWrappers();
         ids = getIdsOfRealmResults();
 
-        notifyDataSetChanged();
+        if (realmResults != null) {
+            notifyDataSetChanged();
+        }
     }
 
     /**
