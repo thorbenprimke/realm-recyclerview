@@ -183,14 +183,14 @@ public abstract class RealmBasedRecyclerViewAdapter
                         .getColumnIndex(animateExtraColumnName);
                 if (animateExtraColumnIndex == TableOrView.NO_MATCH) {
                     throw new IllegalStateException(
-                            "Animating the results requires a valid animateColumnName.");
+                            "Animating the results requires a valid animateExtraColumnName.");
                 }
                 animateExtraIdType = realmResults.getTable().getColumnType(animateExtraColumnIndex);
                 if (animateExtraIdType != RealmFieldType.INTEGER &&
                         animateExtraIdType != RealmFieldType.STRING &&
                         animateExtraIdType != RealmFieldType.DATE) {
                     throw new IllegalStateException(
-                            "Animating requires a animateColumnName of type Int/Long or String");
+                            "Animating requires a animateExtraColumnName of type Integer/Long, Date or String");
                 }
             } else {
                 animateExtraColumnIndex = -1;
