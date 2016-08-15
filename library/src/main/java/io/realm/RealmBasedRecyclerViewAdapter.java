@@ -380,6 +380,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         notifyDataSetChanged();
     }
 
+    public OrderedRealmCollection<T> getRealmResults() {
+        return realmResults;
+    }
+
     @Override
     public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
@@ -463,6 +467,17 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
 
         return value;
+    }
+
+    public int findPosition(int realmIndex) {
+        if (realmResults == null || realmResults.size() == 0) {
+            return -1;
+        }
+        if (ids == null || ids.size() == 0) {
+            return -1;
+        }
+
+        return ids.indexOf(getRealmRowId(realmIndex));
     }
 
     private List getIdsOfRealmResults() {
