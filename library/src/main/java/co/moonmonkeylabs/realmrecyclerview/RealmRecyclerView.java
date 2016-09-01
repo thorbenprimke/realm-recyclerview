@@ -262,6 +262,9 @@ public class RealmRecyclerView extends FrameLayout {
             case LinearLayoutWithHeaders:
                 return ((LayoutManager) recyclerView.getLayoutManager())
                         .findFirstVisibleItemPosition();
+            case StaggeredGridLayout:
+                return ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
+                        .findFirstVisibleItemPositions(null)[0];
             default:
                 throw new IllegalStateException("Type of layoutManager unknown." +
                         "In this case this method needs to be overridden");
