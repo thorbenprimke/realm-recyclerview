@@ -55,10 +55,16 @@ public class MainActivity extends RealmBaseActivity {
         super.onCreate(savedInstanceState);
 
         type = getIntent().getStringExtra("Type");
-        if (type.equals("Grid")) {
-            setContentView(R.layout.activity_main_grid_layout);
-        } else {
-            setContentView(R.layout.activity_main_linear_layout);
+        switch (type) {
+            case "Grid":
+                setContentView(R.layout.activity_main_grid_layout);
+                break;
+            case "Staggered":
+                setContentView(R.layout.activity_main_staggered_grid_layout);
+                break;
+            default:
+                setContentView(R.layout.activity_main_linear_layout);
+                break;
         }
         realmRecyclerView = (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
 
