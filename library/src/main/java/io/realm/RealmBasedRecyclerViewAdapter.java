@@ -376,6 +376,19 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     }
 
+    public String getHeaderAtPosition(int position) {
+        for (int i = rowWrappers.size() - 1; i >= 0; i--) {
+            RowWrapper rowWrapper = rowWrappers.get(i);
+            if (!rowWrapper.isRealm) {
+                if (rowWrapper.sectionHeaderIndex <= position) {
+                    return rowWrapper.header;
+                }
+            }
+        }
+
+        return null;
+    }
+
     private List getIdsOfRealmResults() {
         if (!animateResults || realmResults == null || realmResults.size() == 0) {
             return EMPTY_LIST;
