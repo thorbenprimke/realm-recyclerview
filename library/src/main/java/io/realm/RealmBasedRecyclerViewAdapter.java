@@ -489,6 +489,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
     }
 
+    public List<RowWrapper> getRowWrappers() {
+        return rowWrappers;
+    }
+
     private RealmChangeListener<RealmResults<T>> getRealmChangeListener() {
         return new RealmChangeListener<RealmResults<T>>() {
             @Override
