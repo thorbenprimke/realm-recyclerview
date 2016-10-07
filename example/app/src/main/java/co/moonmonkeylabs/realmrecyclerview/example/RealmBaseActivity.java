@@ -12,7 +12,7 @@ public abstract class RealmBaseActivity extends AppCompatActivity {
     protected RealmConfiguration getRealmConfig() {
         if (realmConfiguration == null) {
             realmConfiguration = new RealmConfiguration
-                    .Builder(this)
+                    .Builder()
                     .deleteRealmIfMigrationNeeded()
                     .build();
         }

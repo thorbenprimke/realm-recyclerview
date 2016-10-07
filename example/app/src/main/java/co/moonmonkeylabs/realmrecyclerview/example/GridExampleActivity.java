@@ -120,7 +120,7 @@ public class GridExampleActivity extends AppCompatActivity {
 
     private RealmConfiguration getRealmConfig() {
         return new RealmConfiguration
-                .Builder(this)
+                .Builder()
                 .modules(Realm.getDefaultModule(), new NYTimesModule())
                 .build();
     }
