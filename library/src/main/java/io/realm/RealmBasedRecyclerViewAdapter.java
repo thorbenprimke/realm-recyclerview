@@ -19,7 +19,6 @@ package io.realm;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,17 +57,17 @@ public abstract class RealmBasedRecyclerViewAdapter
         public final boolean isRealm;
         public final int realmIndex;
         public final int sectionHeaderIndex;
-        public final String header;
+        public final Object header;
 
         public RowWrapper(int realmIndex, int sectionHeaderIndex) {
             this(true, realmIndex, sectionHeaderIndex, null);
         }
 
-        public RowWrapper(int sectionHeaderIndex, String header) {
+        public RowWrapper(int sectionHeaderIndex, Object header) {
             this(false, -1, sectionHeaderIndex, header);
         }
 
-        public RowWrapper(boolean isRealm, int realmIndex, int sectionHeaderIndex, String header) {
+        public RowWrapper(boolean isRealm, int realmIndex, int sectionHeaderIndex, Object header) {
             this.isRealm = isRealm;
             this.realmIndex = realmIndex;
             this.sectionHeaderIndex = sectionHeaderIndex;
@@ -239,8 +238,16 @@ public abstract class RealmBasedRecyclerViewAdapter
         return new RealmViewHolder((TextView) view);
     }
 
+    public String formatHeader(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value.toString();
+    }
+
     public void onBindHeaderViewHolder(RealmViewHolder holder, int position) {
-        String header = rowWrappers.get(position).header;
+        String header = formatHeader(rowWrappers.get(position).header);
         final GridSLM.LayoutParams layoutParams =
             GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
 
@@ -284,7 +291,7 @@ public abstract class RealmBasedRecyclerViewAdapter
             onBindFooterViewHolder((VH) holder, position);
         } else {
             if (addSectionHeaders) {
-                String header = rowWrappers.get(position).header;
+                String header = formatHeader(rowWrappers.get(position).header);
                 ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
                 GridSLM.LayoutParams layoutParams = GridSLM.LayoutParams.from(params);
 
@@ -440,7 +447,7 @@ public abstract class RealmBasedRecyclerViewAdapter
      * Method that creates the header string that should be used. Override this method to have
      * a custom header.
      */
-    public String createHeaderFromColumnValue(T result, long headerIndex) {
+    public Object createHeaderFromColumnValue(T result, long headerIndex) {
         Row row = getRow(result);
         RealmFieldType fieldType = row.getColumnType(headerIndex);
 
@@ -562,7 +569,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     private void addSectionHeaders() {
-        String lastHeader = null;
+        Object lastHeader = null;
         int headerCount = 0;
         int wrapperCount = 0;
         int sectionFirstPosition = 0;
@@ -571,9 +578,9 @@ public abstract class RealmBasedRecyclerViewAdapter
         rowWrappers.clear();
 
         for (T result : realmResults) {
-            String header = createHeaderFromColumnValue(result, headerIndex);
+            Object header = createHeaderFromColumnValue(result, headerIndex);
 
-            if (!TextUtils.equals(lastHeader, header)) {
+            if (!compareHeaders(header, lastHeader)) {
                 sectionFirstPosition = wrapperCount + headerCount;
                 lastHeader = header;
                 headerCount += 1;
@@ -583,6 +590,10 @@ public abstract class RealmBasedRecyclerViewAdapter
 
             rowWrappers.add(new RowWrapper(wrapperCount++, sectionFirstPosition));
         }
+    }
+
+    protected boolean compareHeaders(Object header, Object lastHeader) {
+        return (lastHeader == header) || (lastHeader != null && lastHeader.equals(header));
     }
 
     private void setIds(List ids) {
