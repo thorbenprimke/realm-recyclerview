@@ -127,8 +127,7 @@ public class ToDoActivity extends RealmBaseActivity {
         }
 
         realm.beginTransaction();
-        TodoItem todoItem = realm.createObject(TodoItem.class);
-        todoItem.setId(System.currentTimeMillis());
+        TodoItem todoItem = realm.createObject(TodoItem.class, System.currentTimeMillis());
         todoItem.setDescription(toDoItemText);
         realm.commitTransaction();
     }
