@@ -1,5 +1,7 @@
 # A RecyclerView that is powered by Realm
 
+### Latest 0.9.24 is built with Realm 2.2.1.
+
 A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datastore. It supports the following features out of the box:
 
 * Custom adapter that automatically refreshes the list when the realm changes and animates the new items in.
@@ -21,7 +23,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 ```
 	dependencies {
-	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.23'
+	        compile 'com.github.thorbenprimke:realm-recyclerview:0.9.24'
 	}
 ```
 
