@@ -5,6 +5,7 @@
 
     <string name="linear_demo">Linear Layout Example</string>
     <string name="linear_bulk_demo">Linear Layout Bulk Example</string>
+    <string name="staggered_demo">Staggered Grid Layout Example</string>
     <string name="linear_with_load_more_demo">Linear Layout With Load More Example</string>
     <string name="grid_demo">Grid Layout Example</string>
     <string name="section_demo">Section Header Layout Example</string>

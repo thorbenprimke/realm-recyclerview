@@ -7,6 +7,7 @@
             <enum name="LinearLayout" value="0"/>
             <enum name="Grid" value="1"/>
             <enum name="LinearLayoutWithHeaders" value="2"/>
+            <enum name="StaggeredGridLayout" value="3"/>
         </attr>
         <attr name="rrvGridLayoutSpanCount" format="integer"/>
         <attr name="rrvGridLayoutItemWidth" format="dimension"/>

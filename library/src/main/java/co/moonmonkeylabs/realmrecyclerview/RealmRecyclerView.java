@@ -6,6 +6,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.AttributeSet;
 import android.view.View;
@@ -34,7 +35,8 @@ public class RealmRecyclerView extends FrameLayout {
     private enum Type {
         LinearLayout,
         Grid,
-        LinearLayoutWithHeaders
+        LinearLayoutWithHeaders,
+        StaggeredGridLayout
     }
 
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -54,6 +56,7 @@ public class RealmRecyclerView extends FrameLayout {
     private boolean swipeToDelete;
     private int bufferItems = 3;
 
+    private StaggeredGridLayoutManager staggeredGridManager;
     private GridLayoutManager gridManager;
     private int lastMeasuredWidth = -1;
 
@@ -78,7 +81,7 @@ public class RealmRecyclerView extends FrameLayout {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
-    
+
     public RealmRecyclerView(Context context, AttributeSet attrs, int defStyleAttr, int bufferItems) {
         super(context, attrs, defStyleAttr);
         if (bufferItems <= 0) bufferItems = 0;
@@ -144,6 +147,12 @@ public class RealmRecyclerView extends FrameLayout {
                 recyclerView.setLayoutManager(new LayoutManager(getContext()));
                 break;
 
+            case StaggeredGridLayout:
+                int staggeredSpanCount = gridSpanCount == -1 ? 1 : gridSpanCount;
+                staggeredGridManager = new StaggeredGridLayoutManager(staggeredSpanCount, StaggeredGridLayoutManager.VERTICAL);
+                recyclerView.setLayoutManager(staggeredGridManager);
+                break;
+
             default:
                 throw new IllegalStateException("The type attribute has to be set.");
         }
@@ -186,10 +195,13 @@ public class RealmRecyclerView extends FrameLayout {
      * @param orientation {@link #HORIZONTAL} or {@link #VERTICAL}
      */
     public void setOrientation(int orientation) {
-        if(gridManager == null) {
-            throw new IllegalStateException("Error init of GridLayoutManager");
+        if (gridManager != null) {
+            gridManager.setOrientation(orientation);
+        } else if (staggeredGridManager != null) {
+            staggeredGridManager.setOrientation(orientation);
+        } else {
+            throw new IllegalStateException("Error init of your LayoutManager");
         }
-        gridManager.setOrientation(orientation);
     }
 
     private void throwIfSwipeToDeleteEnabled() {
@@ -250,6 +262,9 @@ public class RealmRecyclerView extends FrameLayout {
             case LinearLayoutWithHeaders:
                 return ((LayoutManager) recyclerView.getLayoutManager())
                         .findFirstVisibleItemPosition();
+            case StaggeredGridLayout:
+                return ((StaggeredGridLayoutManager) recyclerView.getLayoutManager())
+                        .findFirstVisibleItemPositions(null)[0];
             default:
                 throw new IllegalStateException("Type of layoutManager unknown." +
                         "In this case this method needs to be overridden");
@@ -351,8 +366,6 @@ public class RealmRecyclerView extends FrameLayout {
     //
     // Expose public RecyclerView methods to the RealmRecyclerView
     //
-    
-    
     public void setItemViewCacheSize(int size) {
         recyclerView.setItemViewCacheSize(size);
     }
@@ -364,10 +377,10 @@ public class RealmRecyclerView extends FrameLayout {
     public void scrollToPosition(int position) {
         recyclerView.scrollToPosition(position);
     }
-    
+
     //
     // Expose public RecycleView
-    
+    //
     public RecyclerView getRecycleView(){
         return recyclerView;
     }
@@ -375,7 +388,6 @@ public class RealmRecyclerView extends FrameLayout {
     //
     // Pull-to-refresh
     //
-
     public void setOnRefreshListener(OnRefreshListener onRefreshListener) {
         this.onRefreshListener = onRefreshListener;
     }
@@ -387,12 +399,14 @@ public class RealmRecyclerView extends FrameLayout {
         isRefreshing = refreshing;
         swipeRefreshLayout.setRefreshing(refreshing);
     }
-    
+
     public void resetHasLoadMoreFired() {
         hasLoadMoreFired = false;
     }
 
+    //
     // Expose method to change the preloaded items
+    //
     public void setBufferItems(int bufferItems){
         if (bufferItems <= 0) bufferItems = 0;
         this.bufferItems = bufferItems;

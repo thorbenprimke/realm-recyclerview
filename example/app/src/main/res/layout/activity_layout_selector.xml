@@ -37,6 +37,13 @@
             android:text="@string/linear_bulk_demo"/>
 
         <Button
+            android:id="@+id/recycler_staggered_button"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_margin="20dp"
+            android:text="@string/staggered_demo"/>
+
+        <Button
             android:id="@+id/recycler_linear_with_load_more_button"
             android:layout_width="match_parent"
             android:layout_height="50dp"
