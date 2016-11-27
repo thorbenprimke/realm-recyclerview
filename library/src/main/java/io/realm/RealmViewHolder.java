@@ -19,6 +19,11 @@ public class RealmViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
     }
 
+    public RealmViewHolder(View itemView, TextView headerTextView) {
+        super(itemView);
+        this.headerTextView = headerTextView;
+    }
+
     public RealmViewHolder(TextView headerTextView) {
         super(headerTextView);
         this.headerTextView = headerTextView;
