@@ -105,7 +105,6 @@ public abstract class RealmBasedRecyclerViewAdapter
     private long animateExtraColumnIndex;
     private RealmFieldType animateExtraIdType;
 
-    private boolean showListHeaderView = false;
     private Spannable listHeaderSpannable;
 
     public RealmBasedRecyclerViewAdapter(
@@ -258,8 +257,10 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public void onBindHeaderViewHolder(RealmViewHolder holder, int position) {
         Object header = rowWrappers.get(position).header;
-        if (header instanceof Spannable) {
-            holder.headerTextView.setText((Spannable) header);
+        if (getItemViewType(position) == LIST_HEADER_VIEW_TYPE) {
+            if (header instanceof Spannable) {
+                holder.headerTextView.setText((Spannable) header);
+            }
         } else {
             String stringHeader = formatHeader(header);
             holder.headerTextView.setText(stringHeader);
@@ -366,7 +367,7 @@ public abstract class RealmBasedRecyclerViewAdapter
         } else if (footerItem != null && position == getItemCount() - 1) {
             return FOOTER_VIEW_TYPE;
         } else if (!rowWrappers.isEmpty() && !rowWrappers.get(position).isRealm) {
-            if (showListHeaderView && position == 0) {
+            if (listHeaderSpannable != null && position == 0) {
                 return LIST_HEADER_VIEW_TYPE;
             }
             return HEADER_VIEW_TYPE;
@@ -597,11 +598,12 @@ public abstract class RealmBasedRecyclerViewAdapter
 
         rowWrappers.clear();
 
-        if (showListHeaderView) {
+        if (listHeaderSpannable != null) {
+            sectionFirstPosition = 0;
             lastHeader = listHeaderSpannable;
             headerCount += 1;
 
-            rowWrappers.add(new RowWrapper(0, listHeaderSpannable));
+            rowWrappers.add(new RowWrapper(sectionFirstPosition, listHeaderSpannable));
         }
 
         for (T result : realmResults) {
@@ -812,11 +814,10 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     public void hideListHeaderView() {
-        showListHeaderView = false;
+        listHeaderSpannable = null;
     }
 
     public void showListHeaderView(Spannable spannable) {
-        showListHeaderView = true;
         this.listHeaderSpannable = spannable;
     }
 
