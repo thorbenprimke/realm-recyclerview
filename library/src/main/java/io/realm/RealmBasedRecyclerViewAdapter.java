@@ -19,6 +19,7 @@ package io.realm;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,6 +85,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     protected final int HEADER_VIEW_TYPE = 100;
     private final int LOAD_MORE_VIEW_TYPE = 101;
     private final int FOOTER_VIEW_TYPE = 102;
+    protected final int LIST_HEADER_VIEW_TYPE = 103;
 
     private Context context;
     protected LayoutInflater inflater;
@@ -102,6 +104,8 @@ public abstract class RealmBasedRecyclerViewAdapter
     private RealmFieldType animatePrimaryIdType;
     private long animateExtraColumnIndex;
     private RealmFieldType animateExtraIdType;
+
+    private Spannable listHeaderSpannable;
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
@@ -238,6 +242,11 @@ public abstract class RealmBasedRecyclerViewAdapter
         return new RealmViewHolder((TextView) view);
     }
 
+    public RealmViewHolder onCreateListHeaderViewHolder(ViewGroup viewGroup) {
+        View view = inflater.inflate(R.layout.header_item, viewGroup, false);
+        return new RealmViewHolder((TextView) view);
+    }
+
     public String formatHeader(Object value) {
         if (value == null) {
             return null;
@@ -247,11 +256,18 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     public void onBindHeaderViewHolder(RealmViewHolder holder, int position) {
-        String header = formatHeader(rowWrappers.get(position).header);
-        final GridSLM.LayoutParams layoutParams =
-            GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
+        Object header = rowWrappers.get(position).header;
+        if (getItemViewType(position) == LIST_HEADER_VIEW_TYPE) {
+            if (header instanceof Spannable) {
+                holder.headerTextView.setText((Spannable) header);
+            }
+        } else {
+            String stringHeader = formatHeader(header);
+            holder.headerTextView.setText(stringHeader);
+        }
 
-        holder.headerTextView.setText(header);
+        final GridSLM.LayoutParams layoutParams =
+                GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
         if (layoutParams.isHeaderInline()) {
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
@@ -274,6 +290,8 @@ public abstract class RealmBasedRecyclerViewAdapter
             return new RealmViewHolder(new LoadMoreListItemView(viewGroup.getContext()));
         } else if (viewType == FOOTER_VIEW_TYPE) {
             return onCreateFooterViewHolder(viewGroup);
+        } else if (viewType == LIST_HEADER_VIEW_TYPE) {
+            return onCreateListHeaderViewHolder(viewGroup);
         }
 
         return onCreateRealmViewHolder(viewGroup, viewType);
@@ -349,6 +367,9 @@ public abstract class RealmBasedRecyclerViewAdapter
         } else if (footerItem != null && position == getItemCount() - 1) {
             return FOOTER_VIEW_TYPE;
         } else if (!rowWrappers.isEmpty() && !rowWrappers.get(position).isRealm) {
+            if (listHeaderSpannable != null && position == 0) {
+                return LIST_HEADER_VIEW_TYPE;
+            }
             return HEADER_VIEW_TYPE;
         }
 
@@ -577,6 +598,14 @@ public abstract class RealmBasedRecyclerViewAdapter
 
         rowWrappers.clear();
 
+        if (listHeaderSpannable != null) {
+            sectionFirstPosition = 0;
+            lastHeader = listHeaderSpannable;
+            headerCount += 1;
+
+            rowWrappers.add(new RowWrapper(sectionFirstPosition, listHeaderSpannable));
+        }
+
         for (T result : realmResults) {
             Object header = createHeaderFromColumnValue(result, headerIndex);
 
@@ -783,4 +812,13 @@ public abstract class RealmBasedRecyclerViewAdapter
 
         throw new IllegalStateException("Unknown OrderedRealmCollection type: " + realmResults);
     }
+
+    public void hideListHeaderView() {
+        listHeaderSpannable = null;
+    }
+
+    public void showListHeaderView(Spannable spannable) {
+        this.listHeaderSpannable = spannable;
+    }
+
 }
