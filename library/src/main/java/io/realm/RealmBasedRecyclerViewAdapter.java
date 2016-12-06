@@ -105,7 +105,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     private long animateExtraColumnIndex;
     private RealmFieldType animateExtraIdType;
 
-    private Spannable listHeaderSpannable;
+    private Spannable header;
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
@@ -367,7 +367,7 @@ public abstract class RealmBasedRecyclerViewAdapter
         } else if (footerItem != null && position == getItemCount() - 1) {
             return FOOTER_VIEW_TYPE;
         } else if (!rowWrappers.isEmpty() && !rowWrappers.get(position).isRealm) {
-            if (listHeaderSpannable != null && position == 0) {
+            if (header != null && position == 0) {
                 return LIST_HEADER_VIEW_TYPE;
             }
             return HEADER_VIEW_TYPE;
@@ -598,12 +598,12 @@ public abstract class RealmBasedRecyclerViewAdapter
 
         rowWrappers.clear();
 
-        if (listHeaderSpannable != null) {
+        if (header != null) {
             sectionFirstPosition = 0;
-            lastHeader = listHeaderSpannable;
+            lastHeader = header;
             headerCount += 1;
 
-            rowWrappers.add(new RowWrapper(sectionFirstPosition, listHeaderSpannable));
+            rowWrappers.add(new RowWrapper(sectionFirstPosition, header));
         }
 
         for (T result : realmResults) {
@@ -813,12 +813,12 @@ public abstract class RealmBasedRecyclerViewAdapter
         throw new IllegalStateException("Unknown OrderedRealmCollection type: " + realmResults);
     }
 
-    public void hideListHeaderView() {
-        listHeaderSpannable = null;
+    public void hideHeader() {
+        header = null;
     }
 
-    public void showListHeaderView(Spannable spannable) {
-        this.listHeaderSpannable = spannable;
+    public void showHeader(Spannable header) {
+        this.header = header;
     }
 
 }
