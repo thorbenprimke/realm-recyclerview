@@ -815,10 +815,14 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     public void hideHeader() {
         header = null;
+
+        updateRowWrappers();
     }
 
     public void showHeader(Spannable header) {
         this.header = header;
+
+        updateRowWrappers();
     }
 
 }
