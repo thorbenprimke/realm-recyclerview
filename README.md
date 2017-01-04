@@ -33,7 +33,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 ## How To Get Started:
 
-The ```RealmRecyclerView``` has a few attributes that can be set in XML in order to customize it's look and feel and most importanlty which layoutType is used. In addition, it relies on an extended ```RecyclerView.Adapter``` called ```RealmBasedRecyclerViewAdapter``` to provide support for animation and headers.
+The ```RealmRecyclerView``` has a few attributes that can be set in XML in order to customize its look and feel and most importanlty which layoutType is used. In addition, it relies on an extended ```RecyclerView.Adapter``` called ```RealmBasedRecyclerViewAdapter``` to provide support for animation and headers.
 
 ##RealmRecyclerView
 
