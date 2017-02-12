@@ -359,8 +359,14 @@ public class RealmRecyclerView extends FrameLayout {
         if (emptyViewId == 0) {
             return;
         }
-        emptyContentContainer.setVisibility(
-                adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+
+        boolean showEmptyContainer = adapter.getItemCount() == 0;
+        emptyContentContainer.setVisibility(showEmptyContainer ? View.VISIBLE : View.GONE);
+    }
+
+    public void setEmptyViewId(int emptyViewId) {
+        this.emptyViewId = emptyViewId;
+        this.emptyContentContainer.setLayoutResource(emptyViewId);
     }
 
     //

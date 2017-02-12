@@ -4,6 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ViewStub
+        android:id="@+id/rrv_empty_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/rrv_swipe_refresh_layout"
         android:layout_width="match_parent"
@@ -14,11 +20,7 @@
             android:scrollbars="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <ViewStub
-        android:id="@+id/rrv_empty_content_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
 </FrameLayout>
