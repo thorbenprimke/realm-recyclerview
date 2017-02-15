@@ -237,6 +237,10 @@ public abstract class RealmBasedRecyclerViewAdapter
         return context;
     }
 
+    public RealmResults<T> getRealmResults() {
+        return realmResults;
+    }
+
     /**
      * DON'T OVERRIDE THIS METHOD. Implement onCreateRealmViewHolder instead.
      */
