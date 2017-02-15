@@ -56,8 +56,7 @@ public class RealmRecyclerView extends FrameLayout {
     private boolean swipeToDelete;
     private int bufferItems = 3;
 
-    private StaggeredGridLayoutManager staggeredGridManager;
-    private GridLayoutManager gridManager;
+    private RecyclerView.LayoutManager layoutManager;
     private int lastMeasuredWidth = -1;
 
     // State
@@ -92,9 +91,11 @@ public class RealmRecyclerView extends FrameLayout {
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         super.onMeasure(widthSpec, heightSpec);
-        if (gridWidthPx != -1 && gridManager != null && lastMeasuredWidth != getMeasuredWidth()) {
+
+        boolean grid = layoutManager instanceof GridLayoutManager;
+        if (grid && gridWidthPx != -1 && lastMeasuredWidth != getMeasuredWidth()) {
             int spanCount = Math.max(1, getMeasuredWidth() / gridWidthPx);
-            gridManager.setSpanCount(spanCount);
+            ((GridLayoutManager)layoutManager).setSpanCount(spanCount);
             lastMeasuredWidth = getMeasuredWidth();
         }
     }
@@ -107,9 +108,10 @@ public class RealmRecyclerView extends FrameLayout {
         recyclerView = (RecyclerView) findViewById(R.id.rrv_recycler_view);
         emptyContentContainer = (ViewStub) findViewById(R.id.rrv_empty_content_container);
 
-        swipeRefreshLayout.setEnabled(isRefreshable);
         if (isRefreshable) {
-            swipeRefreshLayout.setOnRefreshListener(recyclerViewRefreshListener);
+            enableRefresh();
+        } else {
+            disableRefresh();
         }
 
         if (emptyViewId != 0) {
@@ -122,7 +124,7 @@ public class RealmRecyclerView extends FrameLayout {
         }
         switch (type) {
             case LinearLayout:
-                recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                layoutManager = new LinearLayoutManager(getContext());
                 break;
 
             case Grid:
@@ -138,26 +140,25 @@ public class RealmRecyclerView extends FrameLayout {
                 // Uses either the provided gridSpanCount or 1 as a placeholder what will be
                 // calculated based on gridWidthPx in onMeasure.
                 int spanCount = gridSpanCount == -1 ? 1 : gridSpanCount;
-                gridManager = new GridLayoutManager(getContext(), spanCount);
-                recyclerView.setLayoutManager(gridManager);
+                layoutManager = new GridLayoutManager(getContext(), spanCount);
                 break;
 
             case LinearLayoutWithHeaders:
                 throwIfSwipeToDeleteEnabled();
-                recyclerView.setLayoutManager(new LayoutManager(getContext()));
+                layoutManager = new LayoutManager(getContext());
                 break;
 
             case StaggeredGridLayout:
                 int staggeredSpanCount = gridSpanCount == -1 ? 1 : gridSpanCount;
-                staggeredGridManager = new StaggeredGridLayoutManager(staggeredSpanCount, StaggeredGridLayoutManager.VERTICAL);
-                recyclerView.setLayoutManager(staggeredGridManager);
+                layoutManager = new StaggeredGridLayoutManager(staggeredSpanCount, StaggeredGridLayoutManager.VERTICAL);
                 break;
 
             default:
                 throw new IllegalStateException("The type attribute has to be set.");
         }
-        recyclerView.setHasFixedSize(true);
 
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
         recyclerView.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
                     @Override
@@ -166,7 +167,6 @@ public class RealmRecyclerView extends FrameLayout {
                     }
                 }
         );
-
         recyclerView.addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
                     @Override
@@ -192,15 +192,17 @@ public class RealmRecyclerView extends FrameLayout {
      * Sets the orientation of the layout. {@link android.support.v7.widget.LinearLayoutManager}
      * will do its best to keep scroll position.
      *
-     * @param orientation {@link #HORIZONTAL} or {@link #VERTICAL}
+     * @param orientation {@link LinearLayoutManager#HORIZONTAL} or {@link LinearLayoutManager#VERTICAL}
      */
     public void setOrientation(int orientation) {
-        if (gridManager != null) {
-            gridManager.setOrientation(orientation);
-        } else if (staggeredGridManager != null) {
-            staggeredGridManager.setOrientation(orientation);
-        } else {
+        if (layoutManager == null) {
             throw new IllegalStateException("Error init of your LayoutManager");
+        }
+
+        if (layoutManager instanceof LinearLayoutManager) {
+            ((LinearLayoutManager) layoutManager).setOrientation(orientation);
+        } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+            ((StaggeredGridLayoutManager) layoutManager).setOrientation(orientation);
         }
     }
 
@@ -388,6 +390,33 @@ public class RealmRecyclerView extends FrameLayout {
     //
     // Pull-to-refresh
     //
+
+    public void enableRefresh() {
+        isRefreshable = true;
+        swipeRefreshLayout.setEnabled(true);
+        recyclerViewRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (!isRefreshing) {
+                    if (onRefreshListener == null) {
+                        swipeRefreshLayout.setRefreshing(false);
+                    } else {
+                        onRefreshListener.onRefresh();
+                        isRefreshing = true;
+                    }
+                }
+            }
+        };
+        swipeRefreshLayout.setOnRefreshListener(recyclerViewRefreshListener);
+    }
+
+    public void disableRefresh() {
+        isRefreshable = false;
+        swipeRefreshLayout.setEnabled(false);
+        recyclerViewRefreshListener = null;
+        swipeRefreshLayout.setOnRefreshListener(null);
+    }
+    
     public void setOnRefreshListener(OnRefreshListener onRefreshListener) {
         this.onRefreshListener = onRefreshListener;
     }
