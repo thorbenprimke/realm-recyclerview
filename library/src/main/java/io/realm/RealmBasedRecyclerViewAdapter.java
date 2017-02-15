@@ -299,6 +299,17 @@ public abstract class RealmBasedRecyclerViewAdapter
         }
     }
 
+    public int findPosition(int realmIndex) {
+        if (realmResults == null || realmResults.size() == 0) {
+            return -1;
+        }
+        if (ids == null || ids.size() == 0) {
+            return -1;
+        }
+
+        return ids.indexOf(getRealmRowId(realmIndex));
+    }
+
     @Override
     public int getItemCount() {
         int extraCount = loadMoreItem == null ? 0 : 1;
