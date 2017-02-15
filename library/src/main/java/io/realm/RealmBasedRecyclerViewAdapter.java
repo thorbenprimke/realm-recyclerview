@@ -90,6 +90,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     private List<RowWrapper> rowWrappers;
 
     private RealmChangeListener<RealmResults<T>> listener;
+    private boolean automaticUpdate;
     private boolean animateResults;
     private boolean addSectionHeaders;
     private String headerColumnName;
@@ -157,6 +158,7 @@ public abstract class RealmBasedRecyclerViewAdapter
         this.addSectionHeaders = addSectionHeaders;
         this.headerColumnName = headerColumnName;
         this.inflater = LayoutInflater.from(context);
+        this.automaticUpdate = automaticUpdate;
         this.listener = (!automaticUpdate) ? null : getRealmChangeListener();
 
         rowWrappers = new ArrayList<>();
@@ -341,19 +343,46 @@ public abstract class RealmBasedRecyclerViewAdapter
      * @param queryResults the new RealmResults coming from the new query.
      */
     public void updateRealmResults(RealmResults<T> queryResults) {
-        if (listener != null && realmResults != null) {
-            realmResults.removeChangeListener(listener);
-        }
+        removeListener();
 
         realmResults = queryResults;
-        if (listener != null && realmResults != null) {
-            realmResults.addChangeListener(listener);
-        }
+
+        addListener();
 
         updateRowWrappers();
         ids = getIdsOfRealmResults();
 
         notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(final RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        addListener();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(final RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+
+        removeListener();
+    }
+
+    private boolean isDataValid() {
+        return realmResults != null && realmResults.isValid();
+    }
+
+    private void addListener() {
+        if (automaticUpdate && listener != null && isDataValid()) {
+            realmResults.addChangeListener(listener);
+        }
+    }
+
+    private void removeListener() {
+        if (listener != null && isDataValid()) {
+            realmResults.removeChangeListener(listener);
+        }
     }
 
     /**
