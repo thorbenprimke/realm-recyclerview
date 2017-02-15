@@ -19,6 +19,7 @@ package io.realm;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,17 +56,17 @@ public abstract class RealmBasedRecyclerViewAdapter
         public final boolean isRealm;
         public final int realmIndex;
         public final int sectionHeaderIndex;
-        public final String header;
+        public final Object header;
 
         public RowWrapper(int realmIndex, int sectionHeaderIndex) {
             this(true, realmIndex, sectionHeaderIndex, null);
         }
 
-        public RowWrapper(int sectionHeaderIndex, String header) {
+        public RowWrapper(int sectionHeaderIndex, Object header) {
             this(false, -1, sectionHeaderIndex, header);
         }
 
-        public RowWrapper(boolean isRealm, int realmIndex, int sectionHeaderIndex, String header) {
+        public RowWrapper(boolean isRealm, int realmIndex, int sectionHeaderIndex, Object header) {
             this.isRealm = isRealm;
             this.realmIndex = realmIndex;
             this.sectionHeaderIndex = sectionHeaderIndex;
@@ -74,6 +75,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     private static final List<Long> EMPTY_LIST = new ArrayList<>(0);
+    private static final long NO_SECTION_HEADER_COLUMN = -1L;
 
     private Object loadMoreItem;
     private Object footerItem;
@@ -81,6 +83,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     protected final int HEADER_VIEW_TYPE = 100;
     private final int LOAD_MORE_VIEW_TYPE = 101;
     private final int FOOTER_VIEW_TYPE = 102;
+    protected final int SUMMARY_HEADER_VIEW_TYPE = 103;
 
     private Context context;
     protected LayoutInflater inflater;
@@ -92,12 +95,15 @@ public abstract class RealmBasedRecyclerViewAdapter
     private RealmChangeListener<RealmResults<T>> listener;
     private boolean animateResults;
     private boolean addSectionHeaders;
+    private boolean addSummaryHeader;
     private String headerColumnName;
 
     private long animatePrimaryColumnIndex;
     private RealmFieldType animatePrimaryIdType;
     private long animateExtraColumnIndex;
     private RealmFieldType animateExtraIdType;
+
+    private Spannable header;
 
     public RealmBasedRecyclerViewAdapter(
             Context context,
@@ -110,6 +116,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                 realmResults,
                 automaticUpdate,
                 animateResults,
+                null,
                 false,
                 null,
                 animateExtraColumnName);
@@ -120,7 +127,7 @@ public abstract class RealmBasedRecyclerViewAdapter
             RealmResults<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults) {
-        this(context, realmResults, automaticUpdate, animateResults, false, null);
+        this(context, realmResults, automaticUpdate, animateResults, null, false, null);
     }
 
     public RealmBasedRecyclerViewAdapter(
@@ -135,6 +142,7 @@ public abstract class RealmBasedRecyclerViewAdapter
                 realmResults,
                 automaticUpdate,
                 animateResults,
+                null,
                 addSectionHeaders,
                 headerColumnName,
                 null);
@@ -145,6 +153,26 @@ public abstract class RealmBasedRecyclerViewAdapter
             RealmResults<T> realmResults,
             boolean automaticUpdate,
             boolean animateResults,
+            Spannable summaryHeader,
+            boolean addSectionHeaders,
+            String headerColumnName) {
+        this(
+                context,
+                realmResults,
+                automaticUpdate,
+                animateResults,
+                summaryHeader,
+                addSectionHeaders,
+                headerColumnName,
+                null);
+    }
+
+    public RealmBasedRecyclerViewAdapter(
+            Context context,
+            RealmResults<T> realmResults,
+            boolean automaticUpdate,
+            boolean animateResults,
+            Spannable summaryHeader,
             boolean addSectionHeaders,
             String headerColumnName,
             String animateExtraColumnName) {
@@ -154,6 +182,8 @@ public abstract class RealmBasedRecyclerViewAdapter
 
         this.context = context;
         this.animateResults = animateResults;
+        this.addSummaryHeader = summaryHeader != null;
+        this.header = summaryHeader;
         this.addSectionHeaders = addSectionHeaders;
         this.headerColumnName = headerColumnName;
         this.inflater = LayoutInflater.from(context);
@@ -221,16 +251,42 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     public void onBindHeaderViewHolder(RealmViewHolder holder, int position) {
-        String header = rowWrappers.get(position).header;
+        Object header = rowWrappers.get(position).header;
+        if (getItemViewType(position) == SUMMARY_HEADER_VIEW_TYPE) {
+            if (header instanceof Spannable) {
+                holder.headerTextView.setText((Spannable) header);
+            }
+        } else {
+            String stringHeader = formatHeader(header);
+            holder.headerTextView.setText(stringHeader);
+        }
+
         final GridSLM.LayoutParams layoutParams =
             GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
-
-        holder.headerTextView.setText(header);
         if (layoutParams.isHeaderInline()) {
             layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         } else {
             layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
         }
+    }
+
+    public String formatHeader(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value.toString();
+    }
+
+    public void setHeader(Spannable header) {
+        this.header = header;
+        this.addSummaryHeader = true;
+    }
+
+    public RealmViewHolder onCreateSummaryHeaderViewHolder(ViewGroup viewGroup) {
+        View view = inflater.inflate(R.layout.header_item, viewGroup, false);
+
+        return new RealmViewHolder((TextView) view);
     }
 
     public Context getContext() {
@@ -248,7 +304,10 @@ public abstract class RealmBasedRecyclerViewAdapter
             return new RealmViewHolder(new LoadMoreListItemView(viewGroup.getContext()));
         } else if (viewType == FOOTER_VIEW_TYPE) {
             return onCreateFooterViewHolder(viewGroup);
+        } else if (viewType == SUMMARY_HEADER_VIEW_TYPE) {
+            return onCreateSummaryHeaderViewHolder(viewGroup);
         }
+
         return onCreateRealmViewHolder(viewGroup, viewType);
     }
 
@@ -258,29 +317,30 @@ public abstract class RealmBasedRecyclerViewAdapter
     @Override
     @SuppressWarnings("unchecked")
     public final void onBindViewHolder(RealmViewHolder holder, int position) {
-        if (getItemViewType(position) == LOAD_MORE_VIEW_TYPE) {
+        int itemViewType = getItemViewType(position);
+        if (itemViewType == LOAD_MORE_VIEW_TYPE) {
             holder.loadMoreView.showSpinner();
-        } else if (getItemViewType(position) == FOOTER_VIEW_TYPE) {
+        } else if (itemViewType == FOOTER_VIEW_TYPE) {
             onBindFooterViewHolder((VH) holder, position);
+        } else if (itemViewType == SUMMARY_HEADER_VIEW_TYPE || itemViewType == HEADER_VIEW_TYPE) {
+            String header = formatHeader(rowWrappers.get(position).header);
+            ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
+            GridSLM.LayoutParams layoutParams = GridSLM.LayoutParams.from(params);
+            layoutParams.setSlm(LinearSLM.ID);
+
+            if (header != null) {
+                layoutParams.isHeader = true;
+                layoutParams.setFirstPosition(position);
+                onBindHeaderViewHolder(holder,position);
+            } else {
+                layoutParams.setFirstPosition(rowWrappers.get(position).sectionHeaderIndex);
+                onBindRealmViewHolder((VH) holder, rowWrappers.get(position).realmIndex);
+            }
+
+            holder.itemView.setLayoutParams(layoutParams);
         } else {
-            if (addSectionHeaders) {
-                final String header = rowWrappers.get(position).header;
-                final GridSLM.LayoutParams layoutParams =
-                        GridSLM.LayoutParams.from(holder.itemView.getLayoutParams());
-                // Setup the header
-                if (header != null) {
-                    layoutParams.isHeader = true;
-                    onBindHeaderViewHolder(holder,position);
-                } else {
-                    onBindRealmViewHolder((VH) holder, rowWrappers.get(position).realmIndex);
-                }
-                layoutParams.setSlm(LinearSLM.ID);
-                if (header != null) {
-                    layoutParams.setFirstPosition(position);
-                } else {
-                    layoutParams.setFirstPosition(rowWrappers.get(position).sectionHeaderIndex);
-                }
-                holder.itemView.setLayoutParams(layoutParams);
+            if (!rowWrappers.isEmpty()) {
+                onBindRealmViewHolder((VH) holder, rowWrappers.get(position).realmIndex);
             } else {
                 onBindRealmViewHolder((VH) holder, position);
             }
@@ -288,7 +348,7 @@ public abstract class RealmBasedRecyclerViewAdapter
     }
 
     public Object getLastItem() {
-        if (addSectionHeaders) {
+        if (addSummaryHeader || addSectionHeaders) {
             return realmResults.get(rowWrappers.get(rowWrappers.size() - 1).realmIndex);
         } else {
             return realmResults.get(realmResults.size() - 1);
@@ -300,7 +360,7 @@ public abstract class RealmBasedRecyclerViewAdapter
         int extraCount = loadMoreItem == null ? 0 : 1;
         extraCount += footerItem == null ? 0 : 1;
 
-        if (addSectionHeaders) {
+        if (addSummaryHeader || addSectionHeaders) {
             return rowWrappers.size() + extraCount;
         }
 
@@ -317,8 +377,12 @@ public abstract class RealmBasedRecyclerViewAdapter
         } else if (footerItem != null && position == getItemCount() - 1) {
             return FOOTER_VIEW_TYPE;
         } else if (!rowWrappers.isEmpty() && !rowWrappers.get(position).isRealm) {
+            if (header != null && position == 0) {
+                return SUMMARY_HEADER_VIEW_TYPE;
+            }
             return HEADER_VIEW_TYPE;
         }
+
         return getItemRealmViewType(position);
     }
 
@@ -360,23 +424,36 @@ public abstract class RealmBasedRecyclerViewAdapter
      * Method that creates the header string that should be used. Override this method to have
      * a custom header.
      */
-    public String createHeaderFromColumnValue(Object columnValue) {
-        String result = null;
+    public Object createHeaderFromColumnValue(T result, long headerIndex) {
+        Row row = ((RealmObjectProxy)result).realmGet$proxyState().getRow$realm();
+        RealmFieldType fieldType = row.getColumnType(headerIndex);
+
+        Object columnValue;
+        if (fieldType == RealmFieldType.STRING) {
+            columnValue = row.getString(headerIndex);
+        } else if (fieldType == RealmFieldType.BOOLEAN) {
+            columnValue = row.getBoolean(headerIndex);
+        } else if (fieldType == RealmFieldType.INTEGER) {
+            columnValue = row.getLong(headerIndex);
+        } else {
+            throw new IllegalStateException("columnValue type not supported");
+        }
+
+        String value = null;
         if (columnValue instanceof Boolean) {
-            result = columnValue.toString();
+            value = columnValue.toString();
         } else if (columnValue instanceof String) {
-            result = ((String) columnValue).substring(0, 1);
+            value = ((String) columnValue).substring(0, 1);
         } else if (columnValue instanceof Long) {
-            result = columnValue.toString();
+            value = columnValue.toString();
         } else {
             throw new IllegalStateException("columnType not supported");
         }
 
-        return result;
-
+        return value;
     }
 
-    public String getHeaderAtPosition(int position) {
+    public Object getHeaderAtPosition(int position) {
         for (int i = rowWrappers.size() - 1; i >= 0; i--) {
             RowWrapper rowWrapper = rowWrappers.get(i);
             if (!rowWrapper.isRealm) {
@@ -394,7 +471,7 @@ public abstract class RealmBasedRecyclerViewAdapter
             return EMPTY_LIST;
         }
 
-        if (addSectionHeaders) {
+        if (addSummaryHeader || addSectionHeaders) {
             List ids = new ArrayList(rowWrappers.size());
             for (int i = 0; i < rowWrappers.size(); i++) {
                 final RowWrapper rowWrapper = rowWrappers.get(i);
@@ -446,47 +523,51 @@ public abstract class RealmBasedRecyclerViewAdapter
 
     private void updateRowWrappers() {
         if (realmResults == null) {
-            return;
-        }
-        if (addSectionHeaders) {
-            String lastHeader = "";
-            int headerCount = 0;
-            int sectionFirstPosition = 0;
             rowWrappers.clear();
 
-            final long headerIndex = realmResults.getTableOrView().getTable().getColumnIndex(headerColumnName);
-            int i = 0;
-            for (RealmModel result : realmResults) {
-                Object rawHeader;
-                RealmFieldType fieldType = ((RealmObjectProxy) result)
-                        .realmGet$proxyState().getRow$realm().getColumnType(headerIndex);
+            return;
+        }
+        if (addSummaryHeader || addSectionHeaders) {
+            addHeadersAndRows();
+        }
+    }
 
-                if (fieldType == RealmFieldType.STRING) {
-                    rawHeader = ((RealmObjectProxy) result)
-                            .realmGet$proxyState().getRow$realm().getString(headerIndex);
+    private void addHeadersAndRows() {
+        Object lastHeader = null;
+        int headerCount = 0;
+        int wrapperCount = 0;
+        int sectionFirstPosition = 0;
+        long headerIndex = headerColumnName == null ? NO_SECTION_HEADER_COLUMN : realmResults.getTableOrView().getTable().getColumnIndex(headerColumnName);
 
-                } else if (fieldType == RealmFieldType.BOOLEAN) {
-                    rawHeader = ((RealmObjectProxy) result)
-                            .realmGet$proxyState().getRow$realm().getBoolean(headerIndex);
-                } else if (fieldType == RealmFieldType.INTEGER) {
-                    rawHeader = ((RealmObjectProxy) result)
-                            .realmGet$proxyState().getRow$realm().getLong(headerIndex);
-                } else {
-                    throw new IllegalStateException("columnValue type not supported");
-                }
+        rowWrappers.clear();
 
-                String header = createHeaderFromColumnValue(rawHeader);
-                if (!TextUtils.equals(lastHeader, header)) {
-                    // Insert new header view and update section data.
-                    sectionFirstPosition = i + headerCount;
+        if (!realmResults.isEmpty() && header != null) {
+            sectionFirstPosition = 0;
+            lastHeader = header;
+            headerCount += 1;
+
+            rowWrappers.add(new RowWrapper(sectionFirstPosition, header));
+        }
+
+        for (T result : realmResults) {
+            if (addSectionHeaders) {
+                Object header = createHeaderFromColumnValue(result, headerIndex);
+
+                if (!compareHeaders(header, lastHeader)) {
+                    sectionFirstPosition = wrapperCount + headerCount;
                     lastHeader = header;
                     headerCount += 1;
 
                     rowWrappers.add(new RowWrapper(sectionFirstPosition, header));
                 }
-                rowWrappers.add(new RowWrapper(i++, sectionFirstPosition));
             }
+
+            rowWrappers.add(new RowWrapper(wrapperCount++, sectionFirstPosition));
         }
+    }
+
+    private boolean compareHeaders(Object header, Object lastHeader) {
+        return (lastHeader == header) || (lastHeader != null && lastHeader.equals(header));
     }
 
     public List<RowWrapper> getRowWrappers() {
@@ -507,12 +588,12 @@ public abstract class RealmBasedRecyclerViewAdapter
                         return;
                     }
                     Patch patch = DiffUtils.diff(ids, newIds);
-                    List    <Delta> deltas = patch.getDeltas();
+                    List<Delta> deltas = patch.getDeltas();
                     ids = newIds;
                     if (deltas.isEmpty()) {
                         // Nothing has changed - most likely because the notification was for
                         // a different object/table
-                    } else if (addSectionHeaders) {
+                    } else if (addSummaryHeader || addSectionHeaders) {
                         // If sectionHeaders are enabled, the animations have some special cases and
                         // the non-animated rows need to be updated as well.
                         Delta delta = deltas.get(0);
@@ -570,8 +651,9 @@ public abstract class RealmBasedRecyclerViewAdapter
                         }
                     }
                 } else {
-                    notifyDataSetChanged();
+                    updateRowWrappers();
                     ids = getIdsOfRealmResults();
+                    notifyDataSetChanged();
                 }
             }
         };

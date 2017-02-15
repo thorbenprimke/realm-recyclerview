@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import co.moonmonkeylabs.realmrecyclerview.RealmRecyclerView;
 import co.moonmonkeylabs.realmrecyclerview.example.models.TodoItem;
 import io.realm.Realm;
 import io.realm.RealmBasedRecyclerViewAdapter;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 import io.realm.RealmViewHolder;
 import io.realm.Sort;
@@ -42,6 +45,36 @@ public class ToDoActivity extends RealmBaseActivity {
     };
 
     private Realm realm;
+    private ToDoRealmAdapter toDoRealmAdapter;
+
+    private class TodoSummaryChangeListener implements RealmChangeListener<RealmResults<TodoItem>> {
+
+        @Override
+        public void onChange(RealmResults<TodoItem> element) {
+            Spannable summary = createSummary(element);
+
+            toDoRealmAdapter.setHeader(summary);
+        }
+
+        public Spannable createSummary(RealmResults<TodoItem> element) {
+            SpannableStringBuilder summaryHeader = new SpannableStringBuilder();
+
+            int count = element == null ? 0 : element.size();
+            if (count == 1) {
+                summaryHeader.append("You have only 1 thing left to do, jealous!");
+            } else if (count <= 4) {
+                summaryHeader.append("You have ");
+                summaryHeader.append(String.valueOf(count));
+                summaryHeader.append(" things to do, you'll be done in no time!");
+            } else {
+                summaryHeader.append("You have ");
+                summaryHeader.append(String.valueOf(count));
+                summaryHeader.append(" things to do, hope you don't have plans for the rest of the day...");
+            }
+
+            return summaryHeader;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +96,13 @@ public class ToDoActivity extends RealmBaseActivity {
         RealmResults<TodoItem> toDoItems = realm
                 .where(TodoItem.class)
                 .findAllSorted("id", Sort.ASCENDING);
-        ToDoRealmAdapter toDoRealmAdapter =
-                new ToDoRealmAdapter(this, toDoItems, true, true);
+
+        TodoSummaryChangeListener summaryListener = new TodoSummaryChangeListener();
+        toDoItems.addChangeListener(summaryListener);
+        Spannable summary = summaryListener.createSummary(toDoItems);
+
+        toDoRealmAdapter = new ToDoRealmAdapter(this, toDoItems, true, true, summary);
+
         RealmRecyclerView realmRecyclerView =
                 (RealmRecyclerView) findViewById(R.id.realm_recycler_view);
         realmRecyclerView.setAdapter(toDoRealmAdapter);
@@ -148,8 +186,9 @@ public class ToDoActivity extends RealmBaseActivity {
                 Context context,
                 RealmResults<TodoItem> realmResults,
                 boolean automaticUpdate,
-                boolean animateResults) {
-            super(context, realmResults, automaticUpdate, animateResults);
+                boolean animateResults,
+                Spannable header) {
+            super(context, realmResults, automaticUpdate, animateResults, header, false, null);
         }
 
         @Override
