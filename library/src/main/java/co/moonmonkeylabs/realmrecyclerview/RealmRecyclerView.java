@@ -412,6 +412,12 @@ public class RealmRecyclerView extends FrameLayout {
         this.bufferItems = bufferItems;
     }
 
+    public void setRecyclerMarginBottom(int value) {
+        if (recyclerView != null) {
+            ((MarginLayoutParams)recyclerView.getLayoutParams()).bottomMargin = value;
+        }
+    }
+
     private SwipeRefreshLayout.OnRefreshListener recyclerViewRefreshListener =
             new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
