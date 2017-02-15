@@ -164,43 +164,46 @@ public abstract class RealmBasedRecyclerViewAdapter
         // If automatic updates aren't enabled, then animateResults should be false as well.
         this.animateResults = (automaticUpdate && animateResults);
         if (animateResults) {
-            animatePrimaryColumnIndex = realmResults.getTableOrView().getTable().getPrimaryKey();
-            if (animatePrimaryColumnIndex == TableOrView.NO_MATCH) {
-                throw new IllegalStateException(
-                        "Animating the results requires a primaryKey.");
-            }
-            animatePrimaryIdType = realmResults.getTableOrView().getColumnType(animatePrimaryColumnIndex);
-            if (animatePrimaryIdType != RealmFieldType.INTEGER &&
-                    animatePrimaryIdType != RealmFieldType.STRING) {
-                throw new IllegalStateException(
-                        "Animating requires a primary key of type Integer/Long or String");
-            }
-
-            if (animateExtraColumnName != null) {
-                animateExtraColumnIndex = realmResults.getTableOrView().getTable()
-                        .getColumnIndex(animateExtraColumnName);
-                if (animateExtraColumnIndex == TableOrView.NO_MATCH) {
-                    throw new IllegalStateException(
-                            "Animating the results requires a valid animateColumnName.");
-                }
-                animateExtraIdType = realmResults.getTableOrView().getColumnType(animateExtraColumnIndex);
-                if (animateExtraIdType != RealmFieldType.INTEGER &&
-                        animateExtraIdType != RealmFieldType.STRING &&
-                        animateExtraIdType != RealmFieldType.DATE) {
-                    throw new IllegalStateException(
-                            "Animating requires a animateColumnName of type Int/Long or String");
-                }
-            } else {
-                animateExtraColumnIndex = -1;
-            }
+            initAnimateResults(realmResults, animateExtraColumnName);
         }
 
         if (addSectionHeaders && headerColumnName == null) {
-            throw new IllegalStateException(
-                    "A headerColumnName is required for section headers");
+            throw new IllegalStateException("A headerColumnName is required for section headers");
         }
 
         updateRealmResults(realmResults);
+    }
+
+    private void initAnimateResults(RealmResults<T> realmResults, String animateExtraColumnName) {
+        animatePrimaryColumnIndex = realmResults.getTableOrView().getTable().getPrimaryKey();
+        if (animatePrimaryColumnIndex == TableOrView.NO_MATCH) {
+            throw new IllegalStateException(
+                    "Animating the results requires a primaryKey.");
+        }
+        animatePrimaryIdType = realmResults.getTableOrView().getColumnType(animatePrimaryColumnIndex);
+        if (animatePrimaryIdType != RealmFieldType.INTEGER &&
+                animatePrimaryIdType != RealmFieldType.STRING) {
+            throw new IllegalStateException(
+                    "Animating requires a primary key of type Integer/Long or String");
+        }
+
+        if (animateExtraColumnName != null) {
+            animateExtraColumnIndex = realmResults.getTableOrView().getTable()
+                    .getColumnIndex(animateExtraColumnName);
+            if (animateExtraColumnIndex == TableOrView.NO_MATCH) {
+                throw new IllegalStateException(
+                        "Animating the results requires a valid animateColumnName.");
+            }
+            animateExtraIdType = realmResults.getTableOrView().getColumnType(animateExtraColumnIndex);
+            if (animateExtraIdType != RealmFieldType.INTEGER &&
+                    animateExtraIdType != RealmFieldType.STRING &&
+                    animateExtraIdType != RealmFieldType.DATE) {
+                throw new IllegalStateException(
+                        "Animating requires a animateColumnName of type Int/Long or String");
+            }
+        } else {
+            animateExtraColumnIndex = -1;
+        }
     }
 
     public abstract VH onCreateRealmViewHolder(ViewGroup viewGroup, int viewType);
@@ -493,85 +496,105 @@ public abstract class RealmBasedRecyclerViewAdapter
         return rowWrappers;
     }
 
+    public void setIds(List ids) {
+        this.ids = ids;
+    }
+
     private RealmChangeListener<RealmResults<T>> getRealmChangeListener() {
         return new RealmChangeListener<RealmResults<T>>() {
             @Override
             public void onChange(RealmResults<T> element) {
+                updateRowWrappers();
+
                 if (animateResults && ids != null && !ids.isEmpty()) {
-                    updateRowWrappers();
                     List newIds = getIdsOfRealmResults();
+
                     // If the list is now empty, just notify the recyclerView of the change.
                     if (newIds.isEmpty()) {
-                        ids = newIds;
-                        notifyDataSetChanged();
-                        return;
-                    }
-                    Patch patch = DiffUtils.diff(ids, newIds);
-                    List    <Delta> deltas = patch.getDeltas();
-                    ids = newIds;
-                    if (deltas.isEmpty()) {
-                        // Nothing has changed - most likely because the notification was for
-                        // a different object/table
-                    } else if (addSectionHeaders) {
-                        // If sectionHeaders are enabled, the animations have some special cases and
-                        // the non-animated rows need to be updated as well.
-                        Delta delta = deltas.get(0);
-                        if (delta.getType() == Delta.TYPE.INSERT) {
-                            if (delta.getRevised().size() == 1) {
-                                notifyItemInserted(delta.getRevised().getPosition());
-                            } else {
-                                final Chunk revised = delta.getRevised();
-                                notifyItemRangeInserted(revised.getPosition(), revised.size());
-                            }
-                        } else if (delta.getType() == Delta.TYPE.DELETE) {
-                            if (delta.getOriginal().size() == 1) {
-                                notifyItemRemoved(delta.getOriginal().getPosition());
-                            } else {
-                                // Note: The position zero check is to hack around a indexOutOfBound
-                                // exception that happens when the zero position is animated out.
-                                if (delta.getOriginal().getPosition() == 0) {
-                                    notifyDataSetChanged();
-                                    return;
-                                } else {
-                                    notifyItemRangeRemoved(
-                                            delta.getOriginal().getPosition(),
-                                            delta.getOriginal().size());
-                                }
-                            }
+                        setIds(newIds);
 
-                            if (delta.getOriginal().getPosition() - 1 > 0) {
-                                notifyItemRangeChanged(
-                                        0,
-                                        delta.getOriginal().getPosition() - 1);
-                            }
-                            if (delta.getOriginal().getPosition() > 0 && newIds.size() > 0) {
-                                notifyItemRangeChanged(
-                                        delta.getOriginal().getPosition(),
-                                        newIds.size() - 1);
-                            }
-                        } else {
-                            notifyDataSetChanged();
-                        }
+                        notifyDataSetChanged();
                     } else {
-                        for (Delta delta : deltas) {
-                            if (delta.getType() == Delta.TYPE.INSERT) {
-                                notifyItemRangeInserted(
-                                        delta.getRevised().getPosition(),
-                                        delta.getRevised().size());
-                            } else if (delta.getType() == Delta.TYPE.DELETE) {
-                                notifyItemRangeRemoved(
-                                        delta.getOriginal().getPosition(),
-                                        delta.getOriginal().size());
-                            } else {
-                                notifyItemRangeChanged(
-                                        delta.getRevised().getPosition(),
-                                        delta.getRevised().size());
-                            }
+                        Patch patch = DiffUtils.diff(ids, newIds);
+                        List<Delta> deltas = patch.getDeltas();
+
+                        setIds(newIds);
+
+                        if (deltas.isEmpty()) {
+                            // Ids haven't changed but items themselves may have
+                            notifyDataSetChanged();
+                        } else if (addSectionHeaders) {
+                            notifyChangeWithSectionHeaders(newIds, deltas);
+                        } else {
+                            notifyChange(deltas);
                         }
+                    }
+
+                } else {
+                    notifyDataSetChanged();
+
+                    setIds(getIdsOfRealmResults());
+                }
+            }
+
+            private void notifyChange(List<Delta> deltas) {
+                for (Delta delta : deltas) {
+                    if (delta.getType() == Delta.TYPE.INSERT) {
+                        notifyItemRangeInserted(
+                                delta.getRevised().getPosition(),
+                                delta.getRevised().size());
+                    } else if (delta.getType() == Delta.TYPE.DELETE) {
+                        notifyItemRangeRemoved(
+                                delta.getOriginal().getPosition(),
+                                delta.getOriginal().size());
+                    } else {
+                        notifyItemRangeChanged(
+                                delta.getRevised().getPosition(),
+                                delta.getRevised().size());
+                    }
+                }
+            }
+
+            private void notifyChangeWithSectionHeaders(List newIds, List<Delta> deltas) {
+                // If sectionHeaders are enabled, the animations have some special cases and
+                // the non-animated rows need to be updated as well.
+                Delta delta = deltas.get(0);
+                if (delta.getType() == Delta.TYPE.INSERT) {
+                    if (delta.getRevised().size() == 1) {
+                        notifyItemInserted(delta.getRevised().getPosition());
+                    } else {
+                        Chunk revised = delta.getRevised();
+                        notifyItemRangeInserted(revised.getPosition(), revised.size());
+                    }
+                } else if (delta.getType() == Delta.TYPE.DELETE) {
+                    int originalPosition = delta.getOriginal().getPosition();
+                    if (delta.getOriginal().size() == 1) {
+                        notifyItemRemoved(originalPosition);
+                    } else {
+                        // Note: The position zero check is to hack around a indexOutOfBound
+                        // exception that happens when the zero position is animated out.
+                        if (originalPosition == 0) {
+                            notifyDataSetChanged();
+                            return;
+                        } else {
+                            notifyItemRangeRemoved(
+                                    originalPosition,
+                                    delta.getOriginal().size());
+                        }
+                    }
+
+                    if (originalPosition - 1 > 0) {
+                        notifyItemRangeChanged(
+                                0,
+                                originalPosition - 1);
+                    }
+                    if (originalPosition > 0 && newIds.size() > 0) {
+                        notifyItemRangeChanged(
+                                originalPosition,
+                                newIds.size() - 1);
                     }
                 } else {
                     notifyDataSetChanged();
-                    ids = getIdsOfRealmResults();
                 }
             }
         };
