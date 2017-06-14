@@ -10,7 +10,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 * Infinite scrolling (callback for more data fetching)
 * Section headers (backed by SuperSLiM)
 
-##How To Include It:
+## How To Include It:
 
 ```
     allprojects {
@@ -27,7 +27,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 	}
 ```
 
-##Demo
+## Demo
 
 ![Screenshot](https://raw.githubusercontent.com/thorbenprimke/realm-recyclerview/master/extra/screenshot-demo-app.gif)
 
@@ -35,7 +35,7 @@ A powerful ```Recyclerview``` wrapper for working with ```Realm``` as your datas
 
 The ```RealmRecyclerView``` has a few attributes that can be set in XML in order to customize it's look and feel and most importanlty which layoutType is used. In addition, it relies on an extended ```RecyclerView.Adapter``` called ```RealmBasedRecyclerViewAdapter``` to provide support for animation and headers.
 
-##RealmRecyclerView
+## RealmRecyclerView
 
 The snippet below shows how to include the ```RealmRecyclerView``` in your  layout file.
 
@@ -58,7 +58,7 @@ Important to note here is that the ```app:rrvLayoutType``` attribute has to be s
 
 All these will yield vertical linear or grid layouts.
 
-###Other Attributes:
+### Other Attributes:
 
 ```rrvIsRefreshable```: Adds the pull-to-refresh feature to the ```recyclerView```. In order to receive the refresh events, a listner has to be set via ```setOnRefreshListener``` and ```setRefreshing``` is used to control either turn the refersh animation on/off.
 
@@ -70,7 +70,7 @@ All these will yield vertical linear or grid layouts.
 
 ```rrvSwipeToDelete```: This attribute is only supported with ```rrvLayoutType``` of ```LinearLayout```. If set to true, swiping a row to delete is enabled. The row is deleted from the ```Realm``` directly.
 
-##RealmBasedRecyclerViewAdapter: 
+## RealmBasedRecyclerViewAdapter: 
 
 The heart of the ```RealmRecyclerView```'s functionality comes from this custom ```RecyclerView.Adapter```. It includes support for insertion/deletion animation whenever the ```Realm``` changes. It also inculde the logic to generate the headers for the list's contents if it's of type ```LinearLayoutWithHeaders```. 
 
